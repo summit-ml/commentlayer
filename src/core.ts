@@ -18,7 +18,11 @@ export type Comment = {
   resolved: boolean;
   version: string;
   owner: string;
+  /** Emoji → hashed owner tokens of the people who reacted with it. */
+  reactions?: Record<string, string[]>;
 };
+
+export const REACTIONS = ["👍", "👎", "❤️", "⬆️"] as const;
 
 export type Round = { id: string; label: string; createdAt: string };
 
@@ -114,6 +118,8 @@ export async function createCommentStore({ persistence, adminToken = "" }: Store
     resolved: !!c.resolved,
     version: c.version,
     mine: admin || (!!tokenHash && c.owner === tokenHash),
+    reactions: Object.fromEntries(Object.entries(c.reactions ?? {}).filter(([, who]) => who.length).map(([e, who]) => [e, who.length])),
+    myReactions: Object.entries(c.reactions ?? {}).filter(([, who]) => !!tokenHash && who.includes(tokenHash)).map(([e]) => e),
   });
 
   return {
@@ -181,6 +187,17 @@ export async function createCommentStore({ persistence, adminToken = "" }: Store
       await save();
       return pub(c, tokenHash, isAdmin(admin));
     },
+    async react(id: string, emoji: unknown, tokenHash: string | null) {
+      const c = comments.find((item) => item.id === id);
+      if (!c) return { error: "Not found.", status: 404 } as StoreError;
+      if (!tokenHash) return { error: "Missing token.", status: 400 } as StoreError;
+      if (typeof emoji !== "string" || !(REACTIONS as readonly string[]).includes(emoji)) return { error: "Unknown reaction.", status: 400 } as StoreError;
+      c.reactions = c.reactions ?? {};
+      const who = c.reactions[emoji] ?? [];
+      c.reactions[emoji] = who.includes(tokenHash) ? who.filter((t) => t !== tokenHash) : [...who, tokenHash];
+      await save();
+      return pub(c, tokenHash);
+    },
     async remove(id: string, tokenHash: string | null, admin: string | null) {
       const index = comments.findIndex((item) => item.id === id);
       if (index === -1) return { error: "Not found.", status: 404 } as StoreError;
@@ -210,7 +227,7 @@ const CORS = {
 
 /**
  * Routes, relative to `base` (the overlay's `data-api`):
- * GET/POST comments · PATCH/DELETE comments/:id · GET comments.csv ·
+ * GET/POST comments · PATCH/DELETE comments/:id · POST comments/:id/react · GET comments.csv ·
  * GET/POST versions · PATCH versions/:id
  *
  * `getStore` is called per request so a runtime without a persistent process (a Worker) can
@@ -231,7 +248,7 @@ export function createHandler(getStore: () => CommentStore | Promise<CommentStor
     const tokenHash = rawToken ? await sha256(rawToken) : null;
     const admin = req.headers.get("x-comment-admin");
     const body = async () => ((await req.json().catch(() => ({}))) ?? {}) as Record<string, unknown>;
-    const [head, id] = parts;
+    const [head, id, action] = parts;
 
     if (head === "comments.csv" && req.method === "GET") {
       return new Response(store.csv(), { headers: { "Content-Type": "text/csv; charset=utf-8", "Content-Disposition": 'attachment; filename="comments.csv"', "Cache-Control": "no-cache", ...extra } });
@@ -253,6 +270,10 @@ export function createHandler(getStore: () => CommentStore | Promise<CommentStor
       if (req.method === "POST" && !id) {
         const r = await store.create(await body(), tokenHash);
         return isStoreError(r) ? json({ error: r.error }, r.status) : json(r, 201);
+      }
+      if (req.method === "POST" && id && action === "react") {
+        const r = await store.react(id, (await body()).emoji, tokenHash);
+        return isStoreError(r) ? json({ error: r.error }, r.status) : json(r);
       }
       if (req.method === "PATCH" && id) {
         const r = await store.update(id, await body(), tokenHash, admin);

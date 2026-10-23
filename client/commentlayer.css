@@ -186,3 +186,22 @@ body:has(> .cl-layer.cl-on) .cl-ui button, body:has(> .cl-layer.cl-on) .cl-ui a,
 .cl-menu .cl-menu-item small { display: block; font-size: 11.5px; color: var(--cl-fg-soft); margin-top: 1px; }
 .cl-drawer-foot .cl-menu, .cl-foot .cl-menu { left: 0; }
 .cl-menu.cl-menu-down { top: calc(100% + 6px); bottom: auto; left: auto; right: 0; min-width: 250px; }
+
+/* ── reactions ───────────────────────────────────────────────────────── */
+.cl-react { display: flex; align-items: center; gap: 4px; margin-top: 6px; min-height: 20px; }
+.cl-react-chip { display: inline-flex; align-items: center; gap: 2px; height: 20px; padding: 0 7px; border: 1px solid var(--cl-surface-line); border-radius: 999px; background: transparent; color: var(--cl-fg); font: 11px/1 var(--cl-font); cursor: pointer; transition: border-color 140ms, background 140ms; }
+.cl-react-chip span { color: var(--cl-fg-soft); }
+.cl-react-chip.is-mine { border-color: var(--cl-accent); background: color-mix(in srgb, var(--cl-accent) 14%, transparent); }
+.cl-react-chip:hover { border-color: var(--cl-fg-soft); }
+.cl-react-picker { position: relative; display: inline-flex; align-items: center; height: 20px; }
+.cl-react-smile { color: var(--cl-fg-soft); opacity: .7; transition: opacity 160ms, transform 220ms cubic-bezier(.2, .7, .2, 1); }
+.cl-react-choices { position: absolute; left: 0; top: 0; display: inline-flex; gap: 2px; height: 20px; align-items: center; pointer-events: none; }
+.cl-react-choice { width: 22px; height: 20px; padding: 0; border: 0; border-radius: 6px; background: transparent; font-size: 12px; line-height: 20px; cursor: pointer; opacity: 0; transform: translateX(-6px) scale(.7); transition: opacity 180ms cubic-bezier(.2, .7, .2, 1), transform 260ms cubic-bezier(.2, .7, .2, 1), background 140ms; transition-delay: calc(var(--i) * 35ms); }
+.cl-react-choice:hover { background: var(--cl-surface-soft); }
+.cl-react-choice.is-mine { background: color-mix(in srgb, var(--cl-accent) 18%, transparent); }
+.cl-react-picker:hover .cl-react-smile, .cl-react-picker:focus-within .cl-react-smile { opacity: 0; transform: scale(.6); }
+.cl-react-picker:hover .cl-react-choices, .cl-react-picker:focus-within .cl-react-choices { pointer-events: auto; }
+.cl-react-picker:hover .cl-react-choice, .cl-react-picker:focus-within .cl-react-choice { opacity: 1; transform: none; }
+.cl-react-picker:hover, .cl-react-picker:focus-within { width: 96px; }
+@media (hover: none) { .cl-react-smile { display: none; } .cl-react-choices { position: static; pointer-events: auto; } .cl-react-choice { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .cl-react-choice, .cl-react-smile { transition: none; } }

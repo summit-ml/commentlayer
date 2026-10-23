@@ -245,7 +245,8 @@ function init(cfg) {
       el('span', { class: 'cl-peek-n', text: String(i + 1) }),
       el('span', { class: 'cl-peek-body' }, [
         el('span', { class: 'cl-peek-who' }, [el('b', { text: c.author }), ' · ' + when(c.createdAt)]),
-        el('span', { class: 'cl-peek-text', text: c.text })
+        el('span', { class: 'cl-peek-text', text: c.text }),
+        reactionRow(c)
       ])
     ])));
 
@@ -330,6 +331,25 @@ function init(cfg) {
     } });
     wrap.append(btn);
     return wrap;
+  }
+
+  // Reactions: a small smiley that unfolds on hover into the four choices; chips show counts.
+  const REACTIONS = ['👍', '👎', '❤️', '⬆️'];
+  function reactionRow(c) {
+    const row = el('span', { class: 'cl-react', onclick: e => { e.preventDefault(); e.stopPropagation(); } });
+    const counts = c.reactions || {};
+    const mine = c.myReactions || [];
+    const toggle = async emoji => {
+      try { await api('POST', `${API}/${c.id}/react`, { emoji }); await refresh(); if (drawer) await openDrawer(); } catch (err) { toast(err.message); }
+    };
+    REACTIONS.filter(e => counts[e]).forEach(e => row.append(el('button', { class: 'cl-react-chip' + (mine.includes(e) ? ' is-mine' : ''), type: 'button', title: mine.includes(e) ? 'Remove your reaction' : 'React', onclick: () => toggle(e) }, [e + ' ', el('span', { text: String(counts[e]) })])));
+    const picker = el('span', { class: 'cl-react-picker' });
+    picker.innerHTML = '<svg class="cl-react-smile" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5c1 1.3 2.2 2 3.5 2s2.5-.7 3.5-2"/><circle cx="9" cy="10" r=".6" fill="currentColor"/><circle cx="15" cy="10" r=".6" fill="currentColor"/></svg>';
+    const choices = el('span', { class: 'cl-react-choices' });
+    REACTIONS.forEach((e, i) => choices.append(el('button', { class: 'cl-react-choice' + (mine.includes(e) ? ' is-mine' : ''), type: 'button', text: e, title: ({ '👍': 'Agree', '👎': 'Disagree', '❤️': 'Love it', '⬆️': 'Bump' })[e], style: `--i:${i}`, onclick: () => toggle(e) })));
+    picker.append(choices);
+    row.append(picker);
+    return row;
   }
 
   // The mark: a layer with a pin, drawn in the current theme colors.
@@ -507,7 +527,8 @@ function init(cfg) {
           el('span', { class: 'cl-peek-n', text: String(i + 1) }),
           el('span', { class: 'cl-item-body' }, [
             el('span', { class: 'cl-peek-who' }, [el('b', { text: c.author }), ' · ' + when(c.createdAt) + (c.resolved ? ' · resolved' : '')]),
-            el('span', { class: 'cl-item-text', text: c.text })
+            el('span', { class: 'cl-item-text', text: c.text }),
+            reactionRow(c)
           ])
         ]);
         if (c.mine) item.append(el('button', { class: 'cl-item-delete', type: 'button', text: 'Delete', 'aria-label': 'Delete this comment', onclick: async e => {

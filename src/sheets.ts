@@ -6,7 +6,7 @@ import type { Comment, Persistence, Round, StoreData } from "./core";
  * caller obtains (the browser extension uses Chrome's identity API). No server anywhere.
  */
 
-export const COMMENT_COLUMNS = ["id", "page", "selector", "x", "y", "px", "py", "author", "text", "createdAt", "updatedAt", "resolved", "version", "owner"] as const;
+export const COMMENT_COLUMNS = ["id", "page", "selector", "x", "y", "px", "py", "author", "text", "createdAt", "updatedAt", "resolved", "version", "owner", "reactions"] as const;
 export const ROUND_COLUMNS = ["id", "label", "createdAt"] as const;
 const COMMENTS_TAB = "comments";
 const ROUNDS_TAB = "rounds";
@@ -40,7 +40,7 @@ async function call<T>(opts: SheetsOptions, path: string, init: RequestInit = {}
   return (await res.json()) as T;
 }
 
-const cell = (v: unknown) => (v === null || v === undefined ? "" : typeof v === "boolean" ? (v ? "TRUE" : "FALSE") : String(v));
+const cell = (v: unknown) => (v === null || v === undefined ? "" : typeof v === "boolean" ? (v ? "TRUE" : "FALSE") : typeof v === "object" ? JSON.stringify(v) : String(v));
 const num = (v: string) => (v === "" ? null : Number(v));
 
 function rowToComment(row: string[]): Comment | null {
@@ -61,13 +61,23 @@ function rowToComment(row: string[]): Comment | null {
     resolved: r.resolved === "TRUE",
     version: r.version,
     owner: r.owner,
+    reactions: r.reactions ? safeJson(r.reactions) : undefined,
   };
+}
+
+function safeJson(text: string): Record<string, string[]> | undefined {
+  try {
+    const v = JSON.parse(text);
+    return v && typeof v === "object" ? v : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 export function sheetsPersistence(opts: SheetsOptions): Persistence {
   return {
     async load() {
-      const data = await call<{ valueRanges?: { values?: string[][] }[] }>(opts, `/values:batchGet?ranges=${COMMENTS_TAB}!A2:N&ranges=${ROUNDS_TAB}!A2:C&majorDimension=ROWS`);
+      const data = await call<{ valueRanges?: { values?: string[][] }[] }>(opts, `/values:batchGet?ranges=${COMMENTS_TAB}!A2:O&ranges=${ROUNDS_TAB}!A2:C&majorDimension=ROWS`);
       const [c, r] = data.valueRanges ?? [];
       const comments = (c?.values ?? []).map(rowToComment).filter((x): x is Comment => !!x);
       const versions: Round[] = (r?.values ?? []).filter((row) => row[0]).map((row) => ({ id: row[0], label: row[1] ?? row[0], createdAt: row[2] ?? "" }));
@@ -76,7 +86,7 @@ export function sheetsPersistence(opts: SheetsOptions): Persistence {
     async save(data) {
       const commentRows = data.comments.map((c) => COMMENT_COLUMNS.map((k) => cell(c[k])));
       const roundRows = data.versions.map((v) => ROUND_COLUMNS.map((k) => cell(v[k])));
-      await call(opts, `/values:batchClear`, { method: "POST", body: JSON.stringify({ ranges: [`${COMMENTS_TAB}!A2:N`, `${ROUNDS_TAB}!A2:C`] }) });
+      await call(opts, `/values:batchClear`, { method: "POST", body: JSON.stringify({ ranges: [`${COMMENTS_TAB}!A2:O`, `${ROUNDS_TAB}!A2:C`] }) });
       await call(opts, `/values:batchUpdate`, {
         method: "POST",
         body: JSON.stringify({
