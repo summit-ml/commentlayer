@@ -60,7 +60,7 @@ body:has(> .cl-layer.cl-on) .cl-ui button, body:has(> .cl-layer.cl-on) .cl-ui a,
 .cl-goo-tab { bottom: 0; width: var(--cl-tab-w); height: 36px; border-radius: 999px; transform-origin: 50% 100%; }
 .cl-goo-panel { bottom: 36px; width: var(--cl-panel-w); height: var(--cl-panel-h); border-radius: 16px 16px 0 16px; }
 .cl-panel { position: absolute; right: 0; bottom: 36px; width: min(320px, calc(100vw - 40px)); z-index: 1; background: transparent; border-radius: 16px 16px 0 16px; opacity: 0; pointer-events: none; transition: opacity 110ms ease; }
-.cl-goo-panel { transform-origin: calc(100% - var(--cl-tab-w) / 2) 100%; transform: scale(.3, .04); transition: transform 300ms cubic-bezier(.5, 0, .85, .45); }
+.cl-goo-panel { transform-origin: calc(100% - var(--cl-tab-w) / 2) 100%; transform: scale(.18, 0); transition: transform 300ms cubic-bezier(.5, 0, .85, .45); }
 .cl-tab { position: relative; z-index: 2; display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px 0 12px; background: transparent; color: var(--cl-fg); font: 600 13px/1 var(--cl-font); border: 0; border-radius: 999px; cursor: pointer; }
 .cl-bar.is-open .cl-panel, .cl-bar:focus-within .cl-panel { opacity: 1; pointer-events: auto; transition: opacity 180ms ease 170ms; }
 .cl-bar.is-open .cl-goo-panel, .cl-bar:focus-within .cl-goo-panel { transform: none; transition: transform 760ms var(--cl-spring); }
