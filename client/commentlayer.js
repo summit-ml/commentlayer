@@ -457,7 +457,7 @@ function init(cfg) {
         el('h2', {}, [roundLabel(view) + ' ', el('span', { class: 'cl-count', text: `(${shown.length})` })])
       ]),
       el('span', { class: 'cl-drawer-tools' }, [
-        el('button', { class: 'cl-share', type: 'button', text: 'Share', title: 'Copy an invite link', onclick: share }),
+        shareControl(),
         el('button', { class: 'cl-close', type: 'button', 'aria-label': 'Close', title: 'Close', text: '×', onclick: closeDrawer })
       ])
     ]);
@@ -538,6 +538,25 @@ function init(cfg) {
   async function share() {
     const { text, note } = inviteText();
     try { await navigator.clipboard.writeText(text); toast(note); } catch { prompt('Copy this link', text); }
+  }
+  // On a sheet layer the invite is two steps, so Share opens a small menu; elsewhere it copies at once.
+  function shareControl() {
+    const layer = cfg.layer;
+    if (!(layer && layer.type === 'sheet' && layer.url)) return el('button', { class: 'cl-share', type: 'button', text: 'Share', title: 'Copy an invite link', onclick: share });
+    const wrap = el('span', { class: 'cl-menu-wrap' });
+    const btn = el('button', { class: 'cl-share', type: 'button', text: 'Share', 'aria-haspopup': 'menu', 'aria-expanded': 'false', onclick: e => {
+      e.stopPropagation();
+      if (openMenu && openMenu.parentNode === wrap) { closeMenu(); btn.setAttribute('aria-expanded', 'false'); return; }
+      closeMenu();
+      openMenu = el('div', { class: 'cl-menu cl-menu-down cl-ui', role: 'menu' }, [
+        el('button', { class: 'cl-menu-item', type: 'button', onclick: () => { closeMenu(); share(); } }, [el('b', { text: 'Copy invite link' }), el('small', { text: 'Opens a page that walks them through joining.' })]),
+        el('a', { class: 'cl-menu-item', href: layer.url, target: '_blank', rel: 'noopener', onclick: closeMenu }, [el('b', { text: 'Share the sheet in Google' }), el('small', { text: 'They need access to the sheet before the invite works.' })])
+      ]);
+      wrap.append(openMenu);
+      btn.setAttribute('aria-expanded', 'true');
+    } });
+    wrap.append(btn);
+    return wrap;
   }
 
   function focusComment(id) {
