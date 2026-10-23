@@ -7,6 +7,9 @@
 
 function init(cfg) {
   if (document.querySelector('.cl-bar')) return;
+  const VERSION = '0.1.0';
+  const ABOUT_URL = 'https://summitml.com/products/open-source';
+  const REPO_URL = 'https://github.com/summit-ml/commentlayer';
   const BASE = (scriptApi || cfg.api || '/api/commentlayer').replace(/\/$/, '');
   const API = BASE + '/comments';
   const VERSIONS = BASE + '/versions';
@@ -459,7 +462,14 @@ function init(cfg) {
     } }));
     foot.append(el('span', { class: 'cl-spacer' }), el('span', { class: 'cl-round', text: `${shown.filter(c => !c.resolved).length} OPEN · ${shown.filter(c => c.resolved).length} RESOLVED` }));
 
-    drawer.append(head, rounds, body, foot);
+    const brand = el('div', { class: 'cl-drawer-brand' }, [
+      el('span', { class: 'cl-brand-name' }, [el('span', { class: 'cl-brand-dot' }), 'CommentLayer ', el('span', { class: 'cl-brand-version', text: 'v' + VERSION })]),
+      el('span', { class: 'cl-spacer' }),
+      el('a', { href: ABOUT_URL, target: '_blank', rel: 'noopener', text: 'About' }),
+      el('a', { href: REPO_URL, target: '_blank', rel: 'noopener', text: 'GitHub' }),
+      el('button', { type: 'button', text: 'Settings', onclick: () => { closeDrawer(); themeOpen = true; bar.classList.add('is-open'); renderBar(); } })
+    ]);
+    drawer.append(head, rounds, body, foot, brand);
     document.body.append(drawer);
     requestAnimationFrame(() => drawer && drawer.classList.add('is-in'));
   }
