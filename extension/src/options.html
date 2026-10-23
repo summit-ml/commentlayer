@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CommentLayer settings</title>
+<style>
+  body { font: 14px/1.5 system-ui, sans-serif; margin: 0; padding: 20px; width: 360px; color: #1f1c1f; }
+  h1 { font-size: 16px; margin: 0 0 4px; }
+  p { margin: 0 0 16px; color: #666; }
+  label { display: block; font-weight: 600; margin: 12px 0 4px; }
+  input { width: 100%; box-sizing: border-box; padding: 8px 10px; border: 1px solid #ccc; border-radius: 6px; font: inherit; }
+  small { color: #777; }
+  button { margin-top: 16px; padding: 8px 14px; border: 0; border-radius: 999px; background: #c94a8f; color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
+  .ok { margin-left: 10px; color: #2f7a4a; }
+</style>
+</head>
+<body>
+  <h1>CommentLayer</h1>
+  <p>Point the extension at a backend, then click the toolbar icon on any site to turn comments on there.</p>
+  <label for="api">Backend URL</label>
+  <input id="api" placeholder="https://commentlayer.you.workers.dev/api/commentlayer">
+  <small>The API base of your CommentLayer backend. Everyone on the team uses the same one.</small>
+  <label for="name">Your name</label>
+  <input id="name" placeholder="Shown on your comments">
+  <label for="admin">Admin token</label>
+  <input id="admin" placeholder="Optional">
+  <small>Matches the backend's admin token. Lets you manage rounds and edit anyone's comments.</small>
+  <div><button id="save">Save</button><span id="ok" class="ok" hidden>Saved</span></div>
+  <script src="options.js"></script>
+</body>
+</html>

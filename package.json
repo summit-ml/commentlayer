@@ -5,13 +5,18 @@
   "type": "module",
   "description": "Drop-a-pin review comments for any site: a client overlay plus a storage-backed request handler.",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./core": "./src/core.ts"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p worker",
+    "test": "node --experimental-strip-types --test test/*.test.mjs"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4",
     "@types/node": "^22",
     "typescript": "^5"
-  }
+  },
+  "license": "MIT"
 }

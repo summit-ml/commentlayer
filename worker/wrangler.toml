@@ -1,0 +1,17 @@
+# CommentLayer on Cloudflare Workers. Free tier is plenty for a review cycle.
+#
+#   npx wrangler kv namespace create COMMENTS     # paste the id below
+#   npx wrangler secret put ADMIN_TOKEN           # optional
+#   npx wrangler deploy
+#
+# Then point the overlay or the browser extension at https://<name>.<you>.workers.dev
+name = "commentlayer"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+
+[assets]
+directory = "./public"
+
+[[kv_namespaces]]
+binding = "COMMENTS"
+id = "replace-with-your-namespace-id"

@@ -3,12 +3,17 @@
 (() => {
   if (location.protocol === 'file:') return;
   const script = document.currentScript;
-  const BASE = ((script && script.dataset.api) || '/api/commentlayer').replace(/\/$/, '');
+  const scriptApi = script && script.dataset.api;
+
+function init(cfg) {
+  if (document.querySelector('.cl-bar')) return;
+  const BASE = (scriptApi || cfg.api || '/api/commentlayer').replace(/\/$/, '');
   const API = BASE + '/comments';
   const VERSIONS = BASE + '/versions';
-  const pageKey = () => location.pathname.replace(/\/+$/, '') || '/';
+  const doFetch = cfg.fetch || ((url, init) => fetch(url, init));
+  const pageKey = () => (cfg.scopeHost ? location.host : '') + (location.pathname.replace(/\/+$/, '') || '/');
   let page = pageKey();
-  const ls = {
+  const ls = cfg.storage || {
     get(k) { try { return localStorage.getItem(k); } catch { return null; } },
     set(k, v) { try { localStorage.setItem(k, v); } catch {} }
   };
@@ -53,7 +58,7 @@
   const api = async (method, url, body) => {
     const headers = { 'Content-Type': 'application/json', 'X-Comment-Token': token };
     if (admin) headers['X-Comment-Admin'] = admin;
-    const res = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : undefined });
+    const res = await doFetch(url, { method, headers, body: body ? JSON.stringify(body) : undefined });
     if (res.status === 204) return null;
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || 'Request failed.');
@@ -331,4 +336,11 @@
     const m = location.hash.match(/^#cl-(.+)$/);
     if (m) { setMode(true); setTimeout(() => focusComment(m[1]), 250); }
   });
+}
+
+  // Hosts can set window.CommentLayerConfig to an object or a promise of one ({ api, fetch, storage });
+  // a promise that resolves to null means "not on this page". The browser extension uses this.
+  const cfg = window.CommentLayerConfig;
+  if (cfg && typeof cfg.then === 'function') cfg.then(c => c && init(c));
+  else init(cfg || {});
 })();
