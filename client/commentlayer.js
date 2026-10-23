@@ -334,7 +334,13 @@ function init(cfg) {
 
   function themeTab() {
     const open = comments.filter(c => !c.resolved).length;
-    const tab = el('button', { class: 'cl-tab', type: 'button', 'aria-expanded': String(bar.classList.contains('is-open')), onclick: () => { const o = bar.classList.toggle('is-open'); if (!o) themeOpen = false; tab.setAttribute('aria-expanded', String(o)); if (!o) renderBar(); } }, [
+    // With a pointer that hovers, the pill is the on/off switch (the panel shows on hover anyway).
+    // On touch there is no hover, so a tap opens the panel instead and the switch lives there.
+    const canHover = window.matchMedia('(hover: hover)').matches;
+    const tab = el('button', { class: 'cl-tab', type: 'button', title: canHover ? (mode ? 'Turn commenting off' : 'Turn commenting on') : null, 'aria-pressed': canHover ? String(mode) : null, 'aria-expanded': canHover ? null : String(bar.classList.contains('is-open')), onclick: () => {
+      if (canHover) { setMode(!mode); return; }
+      const o = bar.classList.toggle('is-open'); if (!o) themeOpen = false; tab.setAttribute('aria-expanded', String(o)); if (!o) renderBar();
+    } }, [
       statusDot(),
       (viewingOld() ? roundLabel(view) : 'Comments') + ' ',
       el('span', { class: 'cl-count', text: `(${open})` })
