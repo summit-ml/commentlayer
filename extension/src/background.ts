@@ -100,7 +100,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
             await chrome.storage.local.set({ "cl-name": name });
           }
         }
-        reply({ enabled: !!layer, api: layer ? (layer.type === "backend" ? layer.api : LOCAL_BASE) : "", layer: layer ? { id: layer.id, name: layer.name, type: layer.type, url: layer.type === 'sheet' ? layer.url : null } : null, values: s.values });
+        reply({ enabled: !!layer, api: layer ? (layer.type === "backend" ? layer.api : LOCAL_BASE) : "", layer: layer ? { id: layer.id, name: layer.name, type: layer.type, url: layer.type === 'sheet' ? layer.url : null, spreadsheetId: layer.type === 'sheet' ? layer.spreadsheetId : null, api: layer.type === 'backend' ? layer.api : null } : null, values: s.values });
       } else if (msg.type === "set") {
         await chrome.storage.local.set({ [msg.key]: msg.value });
         if (msg.key === "cl-admin") stores.clear();
@@ -139,6 +139,18 @@ chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
         const layer: Layer = { id: "l-" + crypto.randomUUID().slice(0, 8), type: "sheet", name: msg.name, spreadsheetId: created.spreadsheetId, url: created.url, sites: {} };
         await chrome.storage.local.set({ layers: [...s.layers, layer], activeLayer: layer.id });
         reply({ ok: true, layer });
+      } else if (msg.type === "addBackend") {
+        const api = String(msg.api || "").replace(/\/$/, "");
+        if (!/^https?:\/\//.test(api)) throw new Error("That backend link doesn't look right.");
+        const s = await settings();
+        const existing = s.layers.find((l) => l.type === "backend" && l.api === api);
+        if (existing) {
+          reply({ ok: true, layer: existing });
+        } else {
+          const layer: Layer = { id: "l-" + crypto.randomUUID().slice(0, 8), type: "backend", name: msg.name || "Shared layer", api, sites: {} };
+          await chrome.storage.local.set({ layers: [...s.layers, layer], activeLayer: layer.id });
+          reply({ ok: true, layer });
+        }
       } else if (msg.type === "openSheet") {
         const spreadsheetId = parseSpreadsheetId(msg.link);
         if (!spreadsheetId) throw new Error("That doesn't look like a Google Sheets link.");

@@ -129,6 +129,9 @@ body:has(> .cl-layer.cl-on) .cl-ui button, body:has(> .cl-layer.cl-on) .cl-ui a,
 .cl-drawer.is-in { opacity: 1; transform: none; }
 .cl-drawer .cl-kicker { display: block; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--cl-accent); margin-bottom: 4px; }
 .cl-drawer-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 18px 18px 12px; }
+.cl-drawer-tools { display: inline-flex; align-items: center; gap: 6px; flex: none; }
+.cl-drawer .cl-share { height: 30px; padding: 0 12px; border: 1px solid var(--cl-surface-line); border-radius: 999px; background: transparent; color: var(--cl-fg); font: 600 12.5px/1 var(--cl-font); cursor: pointer; transition: border-color 140ms, background 140ms; }
+.cl-drawer .cl-share:hover { border-color: var(--cl-accent); background: var(--cl-surface-soft); }
 .cl-drawer h2 { margin: 0; font: 600 18px/1.2 var(--cl-font); letter-spacing: -.01em; }
 .cl-drawer h2 .cl-count { font-weight: 500; }
 .cl-drawer .cl-close { flex: none; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 50%; background: var(--cl-surface-soft); color: var(--cl-fg-soft); font: 400 18px/30px var(--cl-font); cursor: pointer; transition: color 140ms, background 140ms; }

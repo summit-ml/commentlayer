@@ -456,7 +456,10 @@ function init(cfg) {
         el('span', { class: 'cl-kicker', text: 'All comments' }),
         el('h2', {}, [roundLabel(view) + ' ', el('span', { class: 'cl-count', text: `(${shown.length})` })])
       ]),
-      el('button', { class: 'cl-close', type: 'button', 'aria-label': 'Close', title: 'Close', text: '×', onclick: closeDrawer })
+      el('span', { class: 'cl-drawer-tools' }, [
+        el('button', { class: 'cl-share', type: 'button', text: 'Share', title: 'Copy an invite link', onclick: share }),
+        el('button', { class: 'cl-close', type: 'button', 'aria-label': 'Close', title: 'Close', text: '×', onclick: closeDrawer })
+      ])
     ]);
 
     const rounds = el('div', { class: 'cl-rounds', role: 'tablist', 'aria-label': 'Review rounds' });
@@ -522,6 +525,19 @@ function init(cfg) {
     drawer.append(head, rounds, body, foot, brand);
     document.body.append(drawer);
     requestAnimationFrame(() => drawer && drawer.classList.add('is-in'));
+  }
+
+  // Share: a join link for an extension layer, or the page itself for an embed.
+  const JOIN_URL = 'https://summitml.com/commentlayer/join';
+  function inviteText() {
+    const layer = cfg.layer;
+    if (layer && layer.type === 'sheet' && layer.spreadsheetId) return { text: `${JOIN_URL}#sheet=${encodeURIComponent(layer.spreadsheetId)}&name=${encodeURIComponent(layer.name || 'Review layer')}`, note: 'Invite link copied. Share the sheet in Drive too, or they can\'t read it.' };
+    if (layer && layer.type === 'backend' && layer.api) return { text: `${JOIN_URL}#api=${encodeURIComponent(layer.api)}&name=${encodeURIComponent(layer.name || 'Review layer')}`, note: 'Invite link copied.' };
+    return { text: location.origin + location.pathname, note: 'Page link copied. Anyone who can open it can comment.' };
+  }
+  async function share() {
+    const { text, note } = inviteText();
+    try { await navigator.clipboard.writeText(text); toast(note); } catch { prompt('Copy this link', text); }
   }
 
   function focusComment(id) {
