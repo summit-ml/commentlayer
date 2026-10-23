@@ -59,6 +59,7 @@ function init(cfg) {
   const el = (tag, attrs = {}, children = []) => {
     const node = document.createElement(tag);
     Object.entries(attrs).forEach(([k, v]) => {
+      if (v === null || v === undefined) return;
       if (k === 'class') node.className = v;
       else if (k === 'text') node.textContent = v;
       else if (k.startsWith('on')) node.addEventListener(k.slice(2), v);
@@ -283,7 +284,7 @@ function init(cfg) {
 
     const foot = el('div', { class: 'cl-foot' }, [
       el('button', { type: 'button', text: 'All comments', onclick: () => { bar.classList.remove('is-open'); openDrawer(); } }),
-      el('a', { href: BASE + '/comments.csv', text: 'Export' }),
+      exportLink('Export', BASE + '/comments.csv', 'comments.csv', 'text/csv'),
       el('button', { type: 'button', text: 'Theme', onclick: () => { themeOpen = true; bar.classList.add('is-open'); renderBar(); } }),
       el('span', { class: 'cl-spacer' }),
       viewingOld()
@@ -292,6 +293,22 @@ function init(cfg) {
     ]);
 
     mountDock(el('div', { class: 'cl-panel', role: 'group', 'aria-label': 'CommentLayer' }, [head, list, foot]), themeTab());
+  }
+
+  // Export links: a plain href on an embed; through the host's fetch (and a Blob) when the API is not a real URL.
+  function exportLink(label, url, filename, mime) {
+    if (!cfg.fetch) return el('a', { href: url, target: filename.endsWith('.json') ? '_blank' : null, rel: 'noopener', text: label });
+    return el('button', { type: 'button', text: label, onclick: async () => {
+      try {
+        const res = await doFetch(url, { method: 'GET', headers: { 'X-Comment-Token': token } });
+        const content = mime === 'text/csv' ? await res.text() : JSON.stringify(await res.json(), null, 2);
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([content], { type: mime }));
+        a.download = filename;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+      } catch (err) { toast(err.message); }
+    } });
   }
 
   function themeTab() {
@@ -461,10 +478,7 @@ function init(cfg) {
       });
     });
 
-    const foot = el('div', { class: 'cl-drawer-foot' }, [
-      el('a', { href: `${API}.csv`, text: 'Export CSV' }),
-      el('a', { href: API, target: '_blank', rel: 'noopener', text: 'Export JSON' })
-    ]);
+    const foot = el('div', { class: 'cl-drawer-foot' }, [exportLink('Export CSV', `${API}.csv`, 'comments.csv', 'text/csv'), exportLink('Export JSON', API, 'comments.json', 'application/json')]);
     foot.append(el('button', { type: 'button', text: 'Rename round', onclick: async () => {
       if (!ensureAdmin()) return;
       const label = prompt('Rename this round', roundLabel(view));
@@ -541,6 +555,12 @@ function init(cfg) {
     history[k] = function () { const r = orig.apply(this, arguments); queueMicrotask(onNavigate); return r; };
   });
   window.addEventListener('popstate', onNavigate);
+  // Quiet poll so teammates' pins show up without a reload. Skipped while something is being edited.
+  setInterval(() => {
+    if (document.hidden || activePop || themeOpen || drawer) return;
+    if (bar.contains(document.activeElement)) return;
+    refresh();
+  }, 20000);
 
   applyTheme();
   renderBar();

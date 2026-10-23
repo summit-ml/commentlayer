@@ -2,38 +2,99 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>CommentLayer settings</title>
+<title>CommentLayer</title>
 <style>
-  body { font: 14px/1.5 system-ui, sans-serif; margin: 0; padding: 20px; width: 360px; color: #1f1c1f; }
-  h1 { font-size: 16px; margin: 0 0 4px; }
-  p { margin: 0 0 16px; color: #666; }
-  label { display: block; font-weight: 600; margin: 12px 0 4px; }
-  input { width: 100%; box-sizing: border-box; padding: 8px 10px; border: 1px solid #ccc; border-radius: 6px; font: inherit; }
-  small { color: #777; }
+  :root { --bg: #1f1c1f; --fg: #f0efeb; --soft: rgba(240,239,235,.6); --line: rgba(240,239,235,.14); --panel: rgba(240,239,235,.06); --accent: #c94a8f; --mono: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  html, body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.5 system-ui, -apple-system, sans-serif; }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 48px 24px 80px; }
+  .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; font-weight: 600; font-size: 18px; }
+  .brand i { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 3px rgba(201,74,143,.25); }
+  .brand small { font: 11px var(--mono); color: var(--soft); margin-left: 4px; }
+  .lede { color: var(--soft); margin: 0 0 28px; }
+  h2 { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; font-family: var(--mono); color: var(--accent); margin: 32px 0 10px; font-weight: 500; }
+  .card { border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; background: var(--panel); }
+  .card.layer { display: grid; grid-template-columns: 1fr auto; gap: 8px 16px; align-items: start; }
+  .layer b { font-size: 14px; }
+  .layer .meta { font-size: 12px; color: var(--soft); margin-top: 2px; }
+  .layer .meta a { color: inherit; }
+  .layer .sites { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; font: 12px var(--mono); padding: 4px 8px; border-radius: 999px; background: rgba(240,239,235,.08); }
+  .chip button { all: unset; cursor: pointer; color: var(--soft); }
+  .chip button:hover { color: var(--fg); }
+  .actions { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
+  button, .btn { font: 500 13px/1 system-ui, sans-serif; color: var(--soft); background: transparent; border: 0; padding: 8px 10px; border-radius: 8px; cursor: pointer; text-decoration: none; }
+  button:hover, .btn:hover { color: var(--fg); background: rgba(240,239,235,.08); }
+  button.primary { background: var(--accent); color: #fff; font-weight: 600; border-radius: 999px; padding: 9px 14px; }
+  button.primary:hover { background: #d35a9c; }
+  button.active { color: var(--fg); background: rgba(240,239,235,.1); }
+  label { display: block; font-size: 12px; color: var(--soft); margin: 10px 0 4px; }
+  input { width: 100%; box-sizing: border-box; font: 13px system-ui, sans-serif; border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; background: rgba(240,239,235,.06); color: var(--fg); }
+  input::placeholder { color: rgba(240,239,235,.35); }
+  .row { display: flex; gap: 8px; align-items: end; }
+  .row > div { flex: 1; }
+  .hint { font-size: 12px; color: var(--soft); margin: 6px 0 0; }
+  .empty { color: var(--soft); font-size: 13px; padding: 6px 0 2px; }
+  details { margin-top: 20px; }
+  summary { cursor: pointer; color: var(--soft); font-size: 13px; }
+  summary:hover { color: var(--fg); }
   .colors { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-  button { margin-top: 16px; padding: 8px 14px; border: 0; border-radius: 999px; background: #c94a8f; color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
-  .ok { margin-left: 10px; color: #2f7a4a; }
+  #toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 14px; border-radius: 999px; font-size: 13px; opacity: 0; transition: opacity 160ms; pointer-events: none; }
+  #toast.on { opacity: 1; }
 </style>
 </head>
 <body>
-  <h1>CommentLayer</h1>
-  <p>Point the extension at a backend, then click the toolbar icon on any site to turn comments on there.</p>
-  <label for="api">Backend URL</label>
-  <input id="api" placeholder="https://commentlayer.you.workers.dev/api/commentlayer">
-  <small>The API base of your CommentLayer backend. Everyone on the team uses the same one.</small>
-  <label for="name">Your name</label>
-  <input id="name" placeholder="Shown on your comments">
-  <label for="admin">Admin token</label>
-  <input id="admin" placeholder="Optional">
-  <small>Matches the backend's admin token. Lets you manage rounds and edit anyone's comments.</small>
-  <label>Default colors</label>
-  <div class="colors">
-    <input id="primary" placeholder="Primary #hex">
-    <input id="secondary" placeholder="Background #hex">
-    <input id="tertiary" placeholder="Text #hex">
+<div class="wrap">
+  <div class="brand"><i></i>CommentLayer <small id="version"></small></div>
+  <p class="lede">Drop a pin, leave a note, on any site. A layer is a place comments live; share it with the people who should see them.</p>
+
+  <h2>Your layers</h2>
+  <div id="layers"></div>
+  <p class="hint">Click the toolbar icon on any site to turn the active layer on there. Click again to turn it off.</p>
+
+  <h2>Add a layer</h2>
+  <div class="card">
+    <b>Google Sheet</b>
+    <p class="hint" style="margin-top:2px">Free. The spreadsheet lives in your Google Drive; share it with teammates and they can comment too.</p>
+    <div class="row">
+      <div><label for="new-name">Layer name</label><input id="new-name" placeholder="Website redesign"></div>
+      <button class="primary" id="create-sheet">Create sheet</button>
+    </div>
+    <div class="row">
+      <div><label for="open-link">Or open a sheet someone shared with you</label><input id="open-link" placeholder="Paste the Google Sheets link"></div>
+      <button id="open-sheet">Open</button>
+    </div>
   </div>
-  <small>Blank means CommentLayer picks up the site's own --primary-color style properties, or its defaults. The Theme view in the panel overrides these per site.</small>
-  <div><button id="save">Save</button><span id="ok" class="ok" hidden>Saved</span></div>
-  <script src="options.js"></script>
+
+  <details>
+    <summary>Advanced: connect a backend URL</summary>
+    <div class="card" style="margin-top:10px">
+      <p class="hint" style="margin-top:0">For a CommentLayer backend you host yourself, such as the Cloudflare Worker, or a site with the embed.</p>
+      <div class="row">
+        <div><label for="backend-name">Layer name</label><input id="backend-name" placeholder="Staging"></div>
+        <div><label for="backend-url">API base</label><input id="backend-url" placeholder="https://commentlayer.you.workers.dev/api/commentlayer"></div>
+        <button id="add-backend">Add</button>
+      </div>
+    </div>
+  </details>
+
+  <h2>You</h2>
+  <div class="card">
+    <div class="row">
+      <div><label for="name">Your name on comments</label><input id="name" placeholder="Shown next to your notes"></div>
+      <div><label for="admin">Admin token</label><input id="admin" placeholder="Optional"></div>
+    </div>
+    <p class="hint">The admin token lets you start and rename rounds and edit anyone's comments. On a Google Sheet layer, set any token you like and share it with the people who should manage rounds.</p>
+    <label>Default colors</label>
+    <div class="colors">
+      <input id="primary" placeholder="Primary #hex">
+      <input id="secondary" placeholder="Background #hex">
+      <input id="tertiary" placeholder="Text #hex">
+    </div>
+    <p class="hint">Blank means CommentLayer picks up the site's own brand variables, or its defaults. The Theme view in the panel overrides these per site.</p>
+    <div class="actions" style="justify-content:flex-start;margin-top:10px"><button class="primary" id="save">Save</button><button id="sign-out">Sign out of Google</button></div>
+  </div>
+</div>
+<div id="toast"></div>
+<script src="options.js"></script>
 </body>
 </html>

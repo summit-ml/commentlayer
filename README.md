@@ -44,16 +44,30 @@ whatever serves static assets.
 `worker/` is a Worker with KV storage. See [worker/README.md](worker/README.md). Three commands,
 runs on the free tier, serves the overlay files too so you can embed from anywhere.
 
-### 3. Browser extension
+### 3. Browser extension (the free way)
 
-`pnpm build` writes `extension/dist`. In Chrome: Extensions → Developer mode → Load unpacked →
-pick that folder. Open the extension's options, paste your backend URL (for example
-`https://commentlayer.<you>.workers.dev/api/commentlayer`) and your name. Click the toolbar icon
-on any site to turn CommentLayer on there; click again to turn it off. Pages are keyed by host
-and path, so one backend serves every site the team reviews.
+`npm run build` writes `extension/dist`. In Chrome: Extensions → Developer mode → Load unpacked →
+pick that folder. Then open the extension's options.
 
-The extension needs a backend with CORS enabled (the Worker has it) or any backend at all,
-since requests go through the extension's service worker.
+**Google Sheet layers.** Click "Create sheet", sign in with Google, and you have a layer: a
+spreadsheet in your own Drive with a `comments` tab and a `rounds` tab. Click the toolbar icon on
+any site to turn the layer on there, then drop pins. To invite teammates, share the sheet with
+them in Drive and send them the link; they install the extension, paste the link under "open a
+sheet someone shared with you", and they're on the same layer. "Copy invite" writes those steps
+to the clipboard. Access control is Google's sharing: whoever can edit the sheet can comment.
+
+There is no server. The comment store runs inside the extension and talks to the Sheets API
+with the reviewer's own token. See [docs/google-setup.md](docs/google-setup.md) for the
+one-time OAuth client setup the publisher does.
+
+**Backend layers (advanced).** Under "Advanced: connect a backend URL", paste the API base of a
+CommentLayer backend you host, such as the Worker, or a site with the embed. Requests go through
+the extension's service worker, so the backend doesn't need CORS.
+
+A reviewer can belong to several layers. The toolbar icon turns the *active* layer on for the
+current site; the options page shows which sites each layer is on. Pages are keyed by host and
+path, so one layer serves every site a team reviews. Pins from teammates appear within about
+twenty seconds without a reload.
 
 ## Theming
 
@@ -86,8 +100,8 @@ the script tag (or `holiday` in the config) to preview it, or turn them off with
 ## Developing
 
 `npm run typecheck`, `npm test`, and `npm run build` (which writes `extension/dist` and copies the
-overlay into `worker/public`). Node 22 or newer. The code is plain TypeScript consumed as source;
-there is no bundling step for the library yet.
+overlay into `worker/public`). Node 22 or newer. The library is plain TypeScript consumed as source; only
+the extension's service worker is bundled (esbuild).
 
 ## Pieces
 
@@ -97,8 +111,11 @@ there is no bundling step for the library yet.
   { base, cors })`, `memoryPersistence()`, `sha256()`. No Node imports; runs anywhere.
 - `src/index.ts`: the Node entry. Re-exports core and adds `filePersistence(dir)` and `CLIENT_DIR`.
 - `worker/`: Cloudflare Worker with `kvPersistence`.
-- `extension/src/`: Manifest V3 extension. `bridge.js` hands the overlay its config, a fetch that
-  goes through the service worker, and storage shared across sites.
+- `src/sheets.ts`: `sheetsPersistence({ spreadsheetId, token })` and `createLayerSpreadsheet()`,
+  the Google Sheets adapter the extension uses. Runs anywhere `fetch` does.
+- `extension/src/`: Manifest V3 extension. `background.ts` (bundled by the build) holds the
+  layers, signs in with Google, and runs the core store in-process for sheet layers; `bridge.js`
+  hands the overlay its config and a fetch that goes through the service worker.
 - `test/`: `pnpm test` runs the core through the handler with the Node test runner.
 
 ## Host configuration

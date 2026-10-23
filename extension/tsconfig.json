@@ -1,0 +1,5 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": { "types": ["chrome"], "lib": ["es2022", "dom"] },
+  "include": ["src/background.ts", "../src/core.ts", "../src/sheets.ts"]
+}

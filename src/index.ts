@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import type { Persistence, StoreData } from "./core";
 
 export * from "./core";
+export * from "./sheets";
 
 /** Absolute path to the overlay's static files, for whatever serves them. */
 export const CLIENT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../client");

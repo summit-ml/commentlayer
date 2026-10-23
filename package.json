@@ -19,7 +19,8 @@
   ],
   "exports": {
     ".": "./src/index.ts",
-    "./core": "./src/core.ts"
+    "./core": "./src/core.ts",
+    "./sheets": "./src/sheets.ts"
   },
   "files": [
     "src",
@@ -32,7 +33,7 @@
   ],
   "scripts": {
     "build": "node scripts/build.mjs",
-    "typecheck": "tsc --noEmit && tsc --noEmit -p worker",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p worker && tsc --noEmit -p extension",
     "test": "node --experimental-strip-types --test test/*.test.mjs"
   },
   "engines": {
@@ -40,7 +41,9 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4",
+    "@types/chrome": "^0.0.280",
     "@types/node": "^22",
+    "esbuild": "^0.24",
     "typescript": "^5"
   }
 }
