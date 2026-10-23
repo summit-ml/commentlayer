@@ -332,6 +332,13 @@ function init(cfg) {
     return wrap;
   }
 
+  // The mark: a layer with a pin, drawn in the current theme colors.
+  function brandMark(size = 18) {
+    const m = el('span', { class: 'cl-mark', 'aria-hidden': 'true' });
+    m.innerHTML = `<svg viewBox="0 0 64 64" width="${size}" height="${size}"><rect x="8" y="28" width="48" height="28" rx="8" fill="var(--cl-surface)" stroke="currentColor" stroke-opacity=".4" stroke-width="4"/><rect x="8" y="10" width="48" height="28" rx="8" fill="var(--cl-bg)" stroke="currentColor" stroke-width="4"/><circle cx="44" cy="18" r="11" fill="var(--cl-accent)"/></svg>`;
+    return m;
+  }
+
   function themeTab() {
     const open = comments.filter(c => !c.resolved).length;
     // With a pointer that hovers, the pill is the on/off switch (the panel shows on hover anyway).
@@ -522,7 +529,7 @@ function init(cfg) {
     foot.append(el('span', { class: 'cl-spacer' }), el('span', { class: 'cl-round', text: `${shown.filter(c => !c.resolved).length} OPEN · ${shown.filter(c => c.resolved).length} RESOLVED` }));
 
     const brand = el('div', { class: 'cl-drawer-brand' }, [
-      el('span', { class: 'cl-brand-name' }, [el('span', { class: 'cl-brand-dot' }), 'CommentLayer ', el('span', { class: 'cl-brand-version', text: 'v' + VERSION })]),
+      el('span', { class: 'cl-brand-name' }, [brandMark(), el('span', { class: 'cl-wordmark' }, [el('span', { class: 'cl-wordmark-a', text: 'comment' }), el('span', { class: 'cl-wordmark-b', text: 'Layer' })]), el('span', { class: 'cl-brand-version', text: 'v' + VERSION })]),
       el('span', { class: 'cl-spacer' }),
       el('a', { href: ABOUT_URL, target: '_blank', rel: 'noopener', text: 'About' }),
       el('a', { href: REPO_URL, target: '_blank', rel: 'noopener', text: 'GitHub' }),

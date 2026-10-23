@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- CommentLayer mark: a layer with a pin on it. Works on dark and light; the sheets take the context color. -->
+  <rect x="12" y="26" width="40" height="26" rx="7" fill="#2a2529" stroke="#f0efeb" stroke-opacity=".35" stroke-width="2"/>
+  <rect x="12" y="14" width="40" height="26" rx="7" fill="#1f1c1f" stroke="#f0efeb" stroke-opacity=".9" stroke-width="2"/>
+  <circle cx="40" cy="20" r="11" fill="#c94a8f" opacity=".22"/>
+  <circle cx="40" cy="20" r="7" fill="#c94a8f"/>
+</svg>

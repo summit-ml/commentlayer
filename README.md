@@ -1,3 +1,5 @@
+<img src="brand/wordmark.svg" alt="commentLayer" width="300" height="48">
+
 # CommentLayer
 
 Drop a pin, leave a note. Private review comments on any website, stored wherever you choose:
