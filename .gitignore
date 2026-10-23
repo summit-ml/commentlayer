@@ -3,3 +3,4 @@ extension/dist/
 worker/public/
 .data/
 .wrangler/
+chrome-cdp-*/
