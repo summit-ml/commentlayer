@@ -7,3 +7,6 @@
   for "comment" and `#6b6468` for "Layer".
 
 The wordmark is one word, lower-case c, capital L: commentLayer.
+
+`store/` holds the Chrome Web Store images and the listing copy. They're rendered from a design
+file rather than screenshots, so they stay crisp; regenerate them when the UI changes.
