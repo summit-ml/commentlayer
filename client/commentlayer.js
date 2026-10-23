@@ -475,12 +475,16 @@ function init(cfg) {
     shown.slice().sort((a, b) => a.createdAt.localeCompare(b.createdAt)).forEach(c => (groups[c.page] = groups[c.page] || []).push(c));
     Object.keys(groups).sort((a, b) => (a === page ? -1 : b === page ? 1 : a.localeCompare(b))).forEach(p => {
       const open = groups[p].filter(c => !c.resolved).length;
+      // Page keys are paths on an embed and host + path through the extension; both must become real URLs.
+      const pageHref = p.startsWith('/') ? p : '//' + p;
       body.append(el('div', { class: 'cl-group' }, [
-        el('span', { class: 'cl-group-name', text: pageLabel(p) + (p === page ? ' · this page' : '') }),
+        p === page
+          ? el('span', { class: 'cl-group-name', text: pageLabel(p) + ' · this page' })
+          : el('a', { class: 'cl-group-name', href: pageHref, title: 'Open this page', text: pageLabel(p) }),
         el('span', { class: 'cl-group-count', text: open ? `${open} open` : 'all resolved' })
       ]));
       groups[p].forEach((c, i) => {
-        const item = el('a', { class: 'cl-item' + (c.resolved ? ' cl-item-resolved' : ''), href: `${p}#cl-${c.id}`, onclick: e => {
+        const item = el('a', { class: 'cl-item' + (c.resolved ? ' cl-item-resolved' : ''), href: `${pageHref}#cl-${c.id}`, title: p === page ? 'Show this pin' : 'Open the page and show this pin', onclick: e => {
           if (p !== page) return;
           e.preventDefault(); closeDrawer(); focusComment(c.id);
         } }, [
