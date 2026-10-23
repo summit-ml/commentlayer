@@ -125,15 +125,16 @@ function init(cfg) {
     newyear: '<path d="M12 1.5l2.2 7.3 7.3 2.2-7.3 2.2L12 20.5l-2.2-7.3-7.3-2.2 7.3-2.2z"/>'
   };
   const nthWeekday = (year, month, weekday, n) => { const d = new Date(year, month, 1); const offset = (weekday - d.getDay() + 7) % 7; return 1 + offset + (n - 1) * 7; };
+  // Each holiday shows the day before, the day of, and the day after.
   function holidayFor(date) {
-    const m = date.getMonth(), d = date.getDate(), y = date.getFullYear();
-    if (m === 9 && d >= 30) return 'halloween';
-    if (m === 1 && d === 14) return 'valentines';
-    if (m === 2 && d === 17) return 'stpatricks';
-    if (m === 6 && d === 4) return 'july4';
-    if (m === 10 && d === nthWeekday(y, 10, 4, 4)) return 'thanksgiving';
-    if (m === 11 && (d === 24 || d === 25)) return 'christmas';
-    if ((m === 11 && d === 31) || (m === 0 && d === 1)) return 'newyear';
+    const today = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const dates = y => [
+      ['halloween', new Date(y, 9, 31)], ['valentines', new Date(y, 1, 14)], ['stpatricks', new Date(y, 2, 17)], ['july4', new Date(y, 6, 4)],
+      ['thanksgiving', new Date(y, 10, nthWeekday(y, 10, 4, 4))], ['christmas', new Date(y, 11, 25)], ['newyear', new Date(y, 0, 1)]
+    ];
+    for (const y of [today.getFullYear() - 1, today.getFullYear(), today.getFullYear() + 1]) {
+      for (const [name, d] of dates(y)) if (Math.abs(today - d) <= 864e5) return name;
+    }
     return '';
   }
   const holidaySetting = (script && script.dataset.holiday) || (cfg.holiday !== undefined ? String(cfg.holiday) : '');

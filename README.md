@@ -76,10 +76,10 @@ runtime, so set those through the options above rather than CSS.
 
 ## Holidays
 
-On a handful of days the status dot in the pill turns into a small icon in the same colors:
-a pumpkin for Halloween (October 30 and 31), a heart on Valentine's Day, a clover on St.
-Patrick's Day, a star on the Fourth of July, a turkey on US Thanksgiving, a tree on December 24
-and 25, and a sparkle on New Year's Eve and Day. Force one with `data-holiday="halloween"` on
+Around a handful of holidays the status dot in the pill turns into a small icon in the same
+colors: a pumpkin for Halloween, a heart for Valentine's Day, a clover for St. Patrick's Day, a
+star for the Fourth of July, a turkey for US Thanksgiving, a tree for Christmas, and a sparkle
+for New Year's. Each shows for three days: the day before, the day of, and the day after. Force one with `data-holiday="halloween"` on
 the script tag (or `holiday` in the config) to preview it, or turn them off with
 `data-holiday="off"`.
 
