@@ -1,4 +1,4 @@
-const KEYS = ['cl-token', 'cl-name', 'cl-admin'];
+const KEYS = ['cl-token', 'cl-name', 'cl-admin', 'cl-theme'];
 
 const settings = async () => {
   const s = await chrome.storage.local.get(['api', 'sites', ...KEYS]);
@@ -19,6 +19,9 @@ chrome.runtime.onMessage.addListener((msg, sender, reply) => {
   (async () => {
     if (msg.type === 'config') {
       const s = await settings();
+      const hostKey = 'cl-theme:' + msg.host;
+      const perHost = await chrome.storage.local.get(hostKey);
+      s.values[hostKey] = perHost[hostKey] || s.values['cl-theme'] || null;
       reply({ enabled: !!s.sites[msg.host], api: s.api, values: s.values });
     } else if (msg.type === 'set') {
       await chrome.storage.local.set({ [msg.key]: msg.value });

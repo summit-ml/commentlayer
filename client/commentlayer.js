@@ -64,6 +64,56 @@ function init(cfg) {
     if (!res.ok) throw new Error(data.error || 'Request failed.');
     return data;
   };
+  // ── theme: custom (per site) > host config > host site custom properties > defaults ──
+  const THEME_KEYS = ['primary', 'secondary', 'tertiary'];
+  const THEME_LABELS = { primary: 'Primary', secondary: 'Background', tertiary: 'Text' };
+  const THEME_DEFAULTS = { primary: '#c94a8f', secondary: '#1f1c1f', tertiary: '' };
+  const SITE_PROPS = {
+    primary: ['--primary-color', '--color-primary', '--primary', '--brand-color', '--brand', '--accent-color', '--color-accent', '--accent'],
+    secondary: ['--secondary-color', '--color-secondary', '--secondary'],
+    tertiary: ['--tertiary-color', '--color-tertiary', '--tertiary']
+  };
+  const themeKey = () => 'cl-theme' + (cfg.scopeHost ? ':' + location.host : '');
+  const isColor = v => typeof v === 'string' && v.trim() !== '' && CSS.supports('color', v.trim());
+  const rgbOf = v => {
+    const probe = document.createElement('span');
+    probe.style.color = v;
+    document.body.append(probe);
+    const m = getComputedStyle(probe).color.match(/[\d.]+/g) || [0, 0, 0];
+    probe.remove();
+    return m.slice(0, 3).map(Number);
+  };
+  const toHex = v => '#' + rgbOf(v).map(n => Math.round(n).toString(16).padStart(2, '0')).join('');
+  const contrastOn = v => { const [r, g, b] = rgbOf(v); return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255 > 0.6 ? '#1f1c1f' : '#ffffff'; };
+  function themeSources() {
+    const root = getComputedStyle(document.documentElement);
+    let custom = {};
+    try { custom = JSON.parse(ls.get(themeKey()) || '{}') || {}; } catch {}
+    return THEME_KEYS.map(k => {
+      const fromConfig = (script && script.dataset[k]) || (cfg.theme && cfg.theme[k]) || '';
+      const fromSite = SITE_PROPS[k].map(n => root.getPropertyValue(n).trim()).find(isColor) || '';
+      return { key: k, custom: isColor(custom[k]) ? custom[k].trim() : '', config: isColor(fromConfig) ? fromConfig.trim() : '', site: fromSite };
+    });
+  }
+  const resolvedTheme = () => {
+    const v = {};
+    themeSources().forEach(t => { v[t.key] = t.custom || t.config || t.site || THEME_DEFAULTS[t.key]; });
+    if (!v.tertiary) v.tertiary = contrastOn(v.secondary);
+    return v;
+  };
+  function applyTheme() {
+    const v = resolvedTheme();
+    let style = document.getElementById('cl-theme');
+    if (!style) { style = document.createElement('style'); style.id = 'cl-theme'; document.head.append(style); }
+    style.textContent = `.cl-ui.cl-ui{--cl-primary:${v.primary};--cl-secondary:${v.secondary};--cl-tertiary:${v.tertiary};--cl-accent-fg:${contrastOn(v.primary)}}`;
+  }
+  function saveTheme(values) {
+    const clean = {};
+    THEME_KEYS.forEach(k => { if (isColor(values[k])) clean[k] = values[k].trim(); });
+    ls.set(themeKey(), Object.keys(clean).length ? JSON.stringify(clean) : '');
+    applyTheme();
+  }
+  let themeOpen = false;
   const when = iso => new Date(iso).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
   const pageLabel = p => p === '/' ? 'Home' : p.replace(/^\//, '').split('/').map(s => s.replace(/-/g, ' ')).join(' / ').replace(/^\w/, c => c.toUpperCase());
   let toastTimer;
@@ -133,21 +183,60 @@ function init(cfg) {
       ])
     ])));
 
+    if (themeOpen) {
+      const sources = themeSources();
+      const fields = {};
+      const draft = () => { const d = {}; THEME_KEYS.forEach(k => { d[k] = fields[k].value.trim(); }); return d; };
+      const rows = sources.map(t => {
+        const current = t.custom || t.config || t.site || THEME_DEFAULTS[t.key] || contrastOn(resolvedTheme().secondary);
+        const origin = t.custom ? 'custom' : t.config ? 'from the embed' : t.site ? 'from this site' : t.key === 'tertiary' && !THEME_DEFAULTS.tertiary ? 'auto' : 'default';
+        const swatch = el('input', { type: 'color', value: toHex(current), 'aria-label': THEME_LABELS[t.key] + ' color' });
+        const hex = el('input', { type: 'text', value: t.custom ? t.custom : '', placeholder: toHex(current), maxlength: '40', 'aria-label': THEME_LABELS[t.key] + ' hex' });
+        fields[t.key] = hex;
+        swatch.addEventListener('input', () => { hex.value = swatch.value; });
+        hex.addEventListener('input', () => { if (isColor(hex.value)) swatch.value = toHex(hex.value); });
+        return el('label', { class: 'cl-theme-row' }, [
+          el('span', { class: 'cl-theme-name' }, [THEME_LABELS[t.key], el('small', { text: origin })]),
+          swatch, hex
+        ]);
+      });
+      const form = el('form', { class: 'cl-theme', onsubmit: e => { e.preventDefault(); saveTheme(draft()); themeOpen = false; renderBar(); toast('Theme saved for this site.'); } }, [
+        ...rows,
+        el('div', { class: 'cl-theme-actions' }, [
+          el('button', { class: 'cl-primary', type: 'submit', text: 'Save' }),
+          el('button', { type: 'button', text: 'Use site colors', onclick: () => { saveTheme({}); themeOpen = false; renderBar(); } }),
+          el('span', { class: 'cl-spacer' }),
+          el('button', { type: 'button', text: 'Cancel', onclick: () => { themeOpen = false; renderBar(); } })
+        ])
+      ]);
+      bar.append(el('div', { class: 'cl-panel', role: 'group', 'aria-label': 'CommentLayer theme' }, [
+        el('div', { class: 'cl-head' }, [el('div', { class: 'cl-head-text' }, [el('b', { text: 'Theme' }), el('small', { text: 'Colors for CommentLayer on ' + location.host })])]),
+        form
+      ]), themeTab());
+      return;
+    }
+
     const foot = el('div', { class: 'cl-foot' }, [
       el('button', { type: 'button', text: 'All comments', onclick: () => { bar.classList.remove('is-open'); openDrawer(); } }),
       el('a', { href: BASE + '/comments.csv', text: 'Export' }),
+      el('button', { type: 'button', text: 'Theme', onclick: () => { themeOpen = true; bar.classList.add('is-open'); renderBar(); } }),
       el('span', { class: 'cl-spacer' }),
       viewingOld()
         ? el('button', { class: 'cl-round', type: 'button', text: 'Viewing ' + roundLabel(view) + ' · back', title: 'Return to ' + roundLabel(currentVersion), onclick: () => setView(currentVersion) })
         : el('span', { class: 'cl-round', text: roundLabel(view).toUpperCase() })
     ]);
 
-    const tab = el('button', { class: 'cl-tab', type: 'button', 'aria-expanded': String(bar.classList.contains('is-open')), onclick: () => { const o = bar.classList.toggle('is-open'); tab.setAttribute('aria-expanded', String(o)); } }, [
+    bar.append(el('div', { class: 'cl-panel', role: 'group', 'aria-label': 'CommentLayer' }, [head, list, foot]), themeTab());
+  }
+
+  function themeTab() {
+    const open = comments.filter(c => !c.resolved).length;
+    const tab = el('button', { class: 'cl-tab', type: 'button', 'aria-expanded': String(bar.classList.contains('is-open')), onclick: () => { const o = bar.classList.toggle('is-open'); if (!o) themeOpen = false; tab.setAttribute('aria-expanded', String(o)); if (!o) renderBar(); } }, [
       el('span', { class: 'cl-dot' }),
       (viewingOld() ? roundLabel(view) : 'Comments') + ' ',
       el('span', { class: 'cl-count', text: `(${open})` })
     ]);
-    bar.append(el('div', { class: 'cl-panel', role: 'group', 'aria-label': 'CommentLayer' }, [head, list, foot]), tab);
+    return tab;
   }
 
   function setMode(on) {
@@ -322,7 +411,8 @@ function init(cfg) {
       renderBar();
       renderPins();
     } catch {
-      bar.replaceChildren(el('span', { class: 'cl-label', text: 'Comments unavailable right now.' }));
+      renderBar();
+      toast('Comments unavailable right now.');
     }
   }
 
@@ -335,7 +425,7 @@ function init(cfg) {
     if (!name) { renderBar(); return; }
     openNew(e);
   }, true);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closePop(); closeDrawer(); bar.classList.remove('is-open'); } });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closePop(); closeDrawer(); bar.classList.remove('is-open'); if (themeOpen) { themeOpen = false; renderBar(); } } });
   let raf = 0;
   const relayout = () => { if (!mode) return; cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { renderPins(); if (activePop) closePop(); }); };
   window.addEventListener('resize', relayout);
@@ -356,6 +446,8 @@ function init(cfg) {
   });
   window.addEventListener('popstate', onNavigate);
 
+  applyTheme();
+  renderBar();
   layer.classList.toggle('cl-on', mode);
   refresh().then(() => {
     if (adminMatch) toast('Admin mode on: you can edit or delete any comment.');

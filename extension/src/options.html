@@ -10,6 +10,7 @@
   label { display: block; font-weight: 600; margin: 12px 0 4px; }
   input { width: 100%; box-sizing: border-box; padding: 8px 10px; border: 1px solid #ccc; border-radius: 6px; font: inherit; }
   small { color: #777; }
+  .colors { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
   button { margin-top: 16px; padding: 8px 14px; border: 0; border-radius: 999px; background: #c94a8f; color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
   .ok { margin-left: 10px; color: #2f7a4a; }
 </style>
@@ -25,6 +26,13 @@
   <label for="admin">Admin token</label>
   <input id="admin" placeholder="Optional">
   <small>Matches the backend's admin token. Lets you manage rounds and edit anyone's comments.</small>
+  <label>Default colors</label>
+  <div class="colors">
+    <input id="primary" placeholder="Primary #hex">
+    <input id="secondary" placeholder="Background #hex">
+    <input id="tertiary" placeholder="Text #hex">
+  </div>
+  <small>Blank means CommentLayer picks up the site's own --primary-color style properties, or its defaults. The Theme view in the panel overrides these per site.</small>
   <div><button id="save">Save</button><span id="ok" class="ok" hidden>Saved</span></div>
   <script src="options.js"></script>
 </body>

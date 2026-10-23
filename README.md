@@ -55,6 +55,25 @@ and path, so one backend serves every site the team reviews.
 The extension needs a backend with CORS enabled (the Worker has it) or any backend at all,
 since requests go through the extension's service worker.
 
+## Theming
+
+Three brand colors drive the whole overlay: **primary** (pins, switch, accents), **secondary**
+(the pill and panel background), and **tertiary** (text). Everything else is derived. They
+resolve in this order, first match wins:
+
+1. Colors a reviewer set in the panel's **Theme** view, saved per site in their browser.
+2. Colors the host passes in: `data-primary`, `data-secondary`, `data-tertiary` on the script
+   tag, or `theme: { primary, secondary, tertiary }` in `window.CommentLayerConfig`.
+3. The host site's own custom properties on `:root`: `--primary-color`, `--color-primary`,
+   `--primary`, `--brand`, `--accent`, and the secondary and tertiary equivalents.
+4. The defaults: magenta on near-black.
+
+Text and on-accent colors are picked for contrast automatically when not given, so a light
+secondary gets dark text without any configuration. For finer control, override the derived
+tokens (`--cl-accent`, `--cl-bg`, `--cl-fg`, `--cl-surface`, `--cl-font`, and so on) on `.cl-ui`
+in the host's stylesheet. The three brand tokens themselves are written by the overlay at
+runtime, so set those through the options above rather than CSS.
+
 ## Developing
 
 `npm run typecheck`, `npm test`, and `npm run build` (which writes `extension/dist` and copies the

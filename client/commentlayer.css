@@ -1,20 +1,26 @@
 /*! CommentLayer styles. Theme with the --cl-* variables. */
-:root {
-  --cl-bg: #1f1c1f;
-  --cl-fg: #f0efeb;
-  --cl-fg-soft: rgba(240, 239, 235, 0.6);
-  --cl-accent: #c94a8f;
+/* Three brand colors drive everything. The overlay resolves them at runtime (custom > host
+   config > the host site's own --primary-color-style properties > these defaults) and writes
+   --cl-primary / --cl-secondary / --cl-tertiary / --cl-accent-fg into a <style id="cl-theme">. */
+.cl-ui {
+  --cl-primary: #c94a8f;
+  --cl-secondary: #1f1c1f;
+  --cl-tertiary: #f0efeb;
+  --cl-accent: var(--cl-primary);
   --cl-accent-fg: #fff;
-  --cl-surface: #2a2529;
-  --cl-surface-fg: #f0efeb;
-  --cl-surface-muted: rgba(240, 239, 235, 0.6);
-  --cl-surface-line: rgba(240, 239, 235, 0.16);
-  --cl-surface-soft: rgba(240, 239, 235, 0.08);
+  --cl-bg: var(--cl-secondary);
+  --cl-fg: var(--cl-tertiary);
+  --cl-fg-soft: color-mix(in srgb, var(--cl-fg) 60%, transparent);
+  --cl-surface: color-mix(in srgb, var(--cl-bg) 94%, var(--cl-fg));
+  --cl-surface-fg: var(--cl-fg);
+  --cl-surface-muted: var(--cl-fg-soft);
+  --cl-surface-line: color-mix(in srgb, var(--cl-fg) 16%, transparent);
+  --cl-surface-soft: color-mix(in srgb, var(--cl-fg) 8%, transparent);
   --cl-font: system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --cl-danger: #f08a8a;
-  --cl-danger-soft: rgba(240, 138, 138, 0.14);
-  --cl-ok: #8fd3a6;
-  --cl-ok-soft: rgba(143, 211, 166, 0.14);
+  --cl-danger: #e0574f;
+  --cl-danger-soft: color-mix(in srgb, #e0574f 16%, transparent);
+  --cl-ok: #3fae6a;
+  --cl-ok-soft: color-mix(in srgb, #3fae6a 16%, transparent);
 }
 .cl-ui, .cl-ui * { box-sizing: border-box; }
 .cl-drawer button, .cl-pop button { font: inherit; font-weight: 600; border: 0; border-radius: 999px; padding: 9px 14px; cursor: pointer; background: rgba(255, 255, 255, .12); color: var(--cl-fg); white-space: nowrap; }
@@ -93,9 +99,9 @@ body:has(> .cl-layer.cl-on) .cl-ui button, body:has(> .cl-layer.cl-on) .cl-ui a,
 .cl-name-form input { flex: 1; min-width: 0; font: inherit; font-size: 13px; border: 1px solid var(--cl-surface-line); border-radius: 8px; padding: 7px 10px; background: var(--cl-surface-soft); color: var(--cl-fg); }
 .cl-name-form button { font: 600 13px/1 var(--cl-font); border: 0; border-radius: 999px; padding: 8px 12px; background: var(--cl-accent); color: var(--cl-accent-fg); cursor: pointer; }
 .cl-switch { position: relative; flex: none; width: 38px; height: 22px; border-radius: 999px; background: color-mix(in srgb, var(--cl-fg) 16%, transparent); border: 0; cursor: pointer; transition: background 200ms; }
-.cl-switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform 200ms cubic-bezier(.2, .7, .2, 1); }
+.cl-switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--cl-fg); transition: transform 200ms cubic-bezier(.2, .7, .2, 1); }
 .cl-bar[data-on="true"] .cl-switch { background: var(--cl-accent); }
-.cl-bar[data-on="true"] .cl-switch::after { transform: translateX(16px); }
+.cl-bar[data-on="true"] .cl-switch::after { transform: translateX(16px); background: var(--cl-accent-fg); }
 .cl-peek-list { border-top: 1px solid var(--cl-surface-line); border-bottom: 1px solid var(--cl-surface-line); max-height: 240px; overflow: auto; }
 .cl-peek { display: grid; grid-template-columns: 22px 1fr; gap: 10px; padding: 10px 16px; color: inherit; text-decoration: none; transition: background 140ms; }
 .cl-peek:hover { background: var(--cl-surface-soft); }
@@ -116,3 +122,14 @@ body:has(> .cl-layer.cl-on) .cl-ui button, body:has(> .cl-layer.cl-on) .cl-ui a,
 .cl-foot button.cl-round { color: var(--cl-accent); }
 @media (max-width: 600px) { .cl-bar { right: 12px; bottom: 12px; } }
 @media (prefers-reduced-motion: reduce) { .cl-panel, .cl-tab, .cl-tab::before, .cl-switch::after, .cl-dot { transition: none; } }
+.cl-theme { padding: 4px 16px 12px; }
+.cl-theme-row { display: grid; grid-template-columns: 1fr 34px 110px; gap: 10px; align-items: center; padding: 8px 0; border-top: 1px solid var(--cl-surface-line); }
+.cl-theme-name { font-size: 13px; font-weight: 600; }
+.cl-theme-name small { display: block; font-size: 11px; font-weight: 400; color: var(--cl-fg-soft); }
+.cl-theme-row input[type="color"] { width: 34px; height: 28px; padding: 0; border: 1px solid var(--cl-surface-line); border-radius: 7px; background: transparent; cursor: pointer; }
+.cl-theme-row input[type="text"] { width: 100%; box-sizing: border-box; font: 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; border: 1px solid var(--cl-surface-line); border-radius: 7px; padding: 7px 8px; background: var(--cl-surface-soft); color: var(--cl-fg); }
+.cl-theme-actions { display: flex; align-items: center; gap: 4px; margin-top: 10px; }
+.cl-theme-actions button { font: 500 12.5px/1 var(--cl-font); color: var(--cl-fg-soft); background: transparent; border: 0; padding: 7px 8px; border-radius: 8px; cursor: pointer; }
+.cl-theme-actions button:hover { color: var(--cl-fg); background: var(--cl-surface-soft); }
+.cl-theme-actions button.cl-primary { background: var(--cl-accent); color: var(--cl-accent-fg); font-weight: 600; border-radius: 999px; padding: 7px 12px; }
+.cl-theme-actions .cl-spacer { flex: 1; }
