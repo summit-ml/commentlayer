@@ -52,9 +52,10 @@ pick that folder. Then open the extension's options.
 **Google Sheet layers.** Click "Create sheet", sign in with Google, and you have a layer: a
 spreadsheet in your own Drive with a `comments` tab and a `rounds` tab. Click the toolbar icon on
 any site to turn the layer on there, then drop pins. To invite teammates, share the sheet with
-them in Drive and send them the link; they install the extension, paste the link under "open a
-sheet someone shared with you", and they're on the same layer. "Copy invite" writes those steps
-to the clipboard. Access control is Google's sharing: whoever can edit the sheet can comment.
+them in Drive, then click "Copy invite" and send the link. It opens a join page at
+`summitml.com/commentlayer/join`: with the extension installed, the layer is added on the spot;
+without it, the page says how to install and then finishes the join when they come back.
+Access control is Google's sharing: whoever can edit the sheet can comment.
 
 There is no server. The comment store runs inside the extension and talks to the Sheets API
 with the reviewer's own token. See [docs/google-setup.md](docs/google-setup.md) for the

@@ -51,9 +51,9 @@ $('layers').addEventListener('click', async e => {
   else if (act === 'remove') { if (!confirm(`Remove "${layer.name}" from this browser? The comments stay where they are.`)) return; state.layers = state.layers.filter(l => l.id !== layer.id); if (state.activeLayer === layer.id) state.activeLayer = state.layers[0]?.id || ''; await saveLayers(); }
   else if (act === 'unsite') { delete layer.sites[btn.dataset.host]; await saveLayers(); }
   else if (act === 'invite') {
-    const text = `Join my CommentLayer: ${layer.url}\n\n1. Install the CommentLayer extension.\n2. Open its options, paste this link under "open a sheet someone shared with you".\n3. Click the toolbar icon on the site we're reviewing.\n\n(I've shared the sheet with you in Google Drive.)`;
-    await navigator.clipboard.writeText(text);
-    toast('Invite copied. Share the sheet in Drive too.');
+    const join = `https://summitml.com/commentlayer/join#sheet=${encodeURIComponent(layer.spreadsheetId)}&name=${encodeURIComponent(layer.name)}`;
+    await navigator.clipboard.writeText(`You're invited to comment on a site with CommentLayer. Open this link and it walks you through it:\n${join}`);
+    toast('Invite link copied. Share the sheet in Drive too.');
   }
 });
 

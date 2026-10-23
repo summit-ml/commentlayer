@@ -45,6 +45,17 @@
         "commentlayer.css"
       ],
       "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://summitml.com/commentlayer/join*",
+        "https://www.summitml.com/commentlayer/join*",
+        "http://localhost:3000/commentlayer/join*"
+      ],
+      "js": [
+        "join.js"
+      ],
+      "run_at": "document_start"
     }
   ],
   "oauth2": {
