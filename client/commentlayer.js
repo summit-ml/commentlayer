@@ -146,7 +146,7 @@ function init(cfg) {
   }
 
   const when = iso => new Date(iso).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
-  const pageLabel = p => p === '/' ? 'Home' : p.replace(/^\//, '').split('/').map(s => s.replace(/-/g, ' ')).join(' / ').replace(/^\w/, c => c.toUpperCase());
+  const pageLabel = p => p === '/' ? 'Home' : (p.replace(/^\//, '').split('/').filter(Boolean).map(s => s.replace(/-/g, ' ')).join(' / ') || 'Home').replace(/^\w/, c => c.toUpperCase());
   let toastTimer;
   const toast = msg => {
     document.querySelectorAll('.cl-toast').forEach(t => t.remove());
@@ -399,46 +399,68 @@ function init(cfg) {
     await refresh();
     const shown = all.filter(c => c.version === view);
     drawer = el('aside', { class: 'cl-drawer cl-ui', role: 'dialog', 'aria-label': 'All comments' });
-    const head = el('div', { class: 'cl-drawer-head' }, [el('h2', { text: `${roundLabel(view)} (${shown.length})` }), el('button', { class: 'cl-close', type: 'button', text: 'Close', onclick: closeDrawer })]);
+
+    const head = el('div', { class: 'cl-drawer-head' }, [
+      el('div', { class: 'cl-drawer-title' }, [
+        el('span', { class: 'cl-kicker', text: 'All comments' }),
+        el('h2', {}, [roundLabel(view) + ' ', el('span', { class: 'cl-count', text: `(${shown.length})` })])
+      ]),
+      el('button', { class: 'cl-close', type: 'button', 'aria-label': 'Close', title: 'Close', text: '×', onclick: closeDrawer })
+    ]);
+
     const rounds = el('div', { class: 'cl-rounds', role: 'tablist', 'aria-label': 'Review rounds' });
-    versions.forEach(v => rounds.append(el('button', { type: 'button', role: 'tab', class: v.id === view ? 'cl-round-active' : '', 'aria-selected': String(v.id === view), text: `${v.label} (${v.count})`, title: v.id === currentVersion ? 'Current round' : 'Started ' + when(v.createdAt), onclick: () => { setView(v.id); openDrawer(); } })));
+    versions.forEach(v => rounds.append(el('button', { type: 'button', role: 'tab', class: v.id === view ? 'cl-round-active' : '', 'aria-selected': String(v.id === view), title: v.id === currentVersion ? 'Current round' : 'Started ' + when(v.createdAt), onclick: () => { setView(v.id); openDrawer(); } }, [v.label + ' ', el('span', { class: 'cl-count', text: String(v.count) })])));
     if (admin) rounds.append(el('button', { type: 'button', class: 'cl-round-new', text: '+ New round', onclick: async () => {
       const label = prompt('Name for the new review round', `Round ${versions.length + 1}`);
       if (label === null) return;
       try { const r = await api('POST', VERSIONS, { label: label.trim() || undefined }); await refresh(); setView(r.id); await openDrawer(); toast(r.label + ' started. Older comments are stored under their own rounds.'); } catch (err) { toast(err.message); }
     } }));
-    const tools = el('div', { class: 'cl-tools' }, [
-      el('a', { href: `${API}.csv`, text: 'Export CSV' }),
-      el('a', { href: API, target: '_blank', rel: 'noopener', text: 'Export JSON' })
-    ]);
-    if (admin && viewingOld()) tools.append(el('button', { type: 'button', text: 'Rename round', onclick: async () => {
-      const label = prompt('Rename this round', roundLabel(view));
-      if (!label || !label.trim()) return;
-      try { await api('PATCH', `${VERSIONS}/${view}`, { label: label.trim() }); await refresh(); await openDrawer(); } catch (err) { toast(err.message); }
-    } }));
-    drawer.append(head, rounds);
-    if (viewingOld()) drawer.append(el('p', { class: 'cl-round-note', text: 'An earlier round. Its pins show on the page while you view it; new comments go to ' + roundLabel(currentVersion) + '.' }));
-    drawer.append(tools);
-    if (!shown.length) drawer.append(el('p', { class: 'cl-empty', text: viewingOld() ? 'No comments in this round.' : 'No comments in this round yet. Turn on comment mode and click anywhere on a page.' }));
+
+    const body = el('div', { class: 'cl-drawer-body' });
+    if (viewingOld()) body.append(el('p', { class: 'cl-round-note', text: 'An earlier round. Its pins show on the page while you view it; new comments go to ' + roundLabel(currentVersion) + '.' }));
+    if (!shown.length) body.append(el('p', { class: 'cl-empty', text: viewingOld() ? 'No comments in this round.' : 'No comments in this round yet. Turn commenting on and click anything on a page.' }));
     const groups = {};
     shown.slice().sort((a, b) => a.createdAt.localeCompare(b.createdAt)).forEach(c => (groups[c.page] = groups[c.page] || []).push(c));
     Object.keys(groups).sort((a, b) => (a === page ? -1 : b === page ? 1 : a.localeCompare(b))).forEach(p => {
-      drawer.append(el('h3', { text: `${pageLabel(p)} (${groups[p].length})` }));
-      groups[p].forEach(c => {
-        const meta = el('div', { class: 'cl-meta' }); meta.append(el('b', { text: c.author }), el('span', { text: when(c.createdAt) + (c.resolved ? ' · resolved' : '') }));
+      const open = groups[p].filter(c => !c.resolved).length;
+      body.append(el('div', { class: 'cl-group' }, [
+        el('span', { class: 'cl-group-name', text: pageLabel(p) + (p === page ? ' · this page' : '') }),
+        el('span', { class: 'cl-group-count', text: open ? `${open} open` : 'all resolved' })
+      ]));
+      groups[p].forEach((c, i) => {
         const item = el('a', { class: 'cl-item' + (c.resolved ? ' cl-item-resolved' : ''), href: `${p}#cl-${c.id}`, onclick: e => {
           if (p !== page) return;
           e.preventDefault(); closeDrawer(); focusComment(c.id);
-        } }, [meta, el('p', { text: c.text })]);
-        if (c.mine) item.append(el('button', { class: 'cl-item-delete', type: 'button', text: 'Delete', onclick: async e => {
+        } }, [
+          el('span', { class: 'cl-peek-n', text: String(i + 1) }),
+          el('span', { class: 'cl-item-body' }, [
+            el('span', { class: 'cl-peek-who' }, [el('b', { text: c.author }), ' · ' + when(c.createdAt) + (c.resolved ? ' · resolved' : '')]),
+            el('span', { class: 'cl-item-text', text: c.text })
+          ])
+        ]);
+        if (c.mine) item.append(el('button', { class: 'cl-item-delete', type: 'button', text: 'Delete', 'aria-label': 'Delete this comment', onclick: async e => {
           e.preventDefault(); e.stopPropagation();
           if (!confirm('Delete this comment?')) return;
           try { await api('DELETE', `${API}/${c.id}`); closePop(); await openDrawer(); toast('Comment deleted.'); } catch (err) { toast(err.message); }
         } }));
-        drawer.append(item);
+        body.append(item);
       });
     });
+
+    const foot = el('div', { class: 'cl-drawer-foot' }, [
+      el('a', { href: `${API}.csv`, text: 'Export CSV' }),
+      el('a', { href: API, target: '_blank', rel: 'noopener', text: 'Export JSON' })
+    ]);
+    if (admin && viewingOld()) foot.append(el('button', { type: 'button', text: 'Rename round', onclick: async () => {
+      const label = prompt('Rename this round', roundLabel(view));
+      if (!label || !label.trim()) return;
+      try { await api('PATCH', `${VERSIONS}/${view}`, { label: label.trim() }); await refresh(); await openDrawer(); } catch (err) { toast(err.message); }
+    } }));
+    foot.append(el('span', { class: 'cl-spacer' }), el('span', { class: 'cl-round', text: `${shown.filter(c => !c.resolved).length} OPEN · ${shown.filter(c => c.resolved).length} RESOLVED` }));
+
+    drawer.append(head, rounds, body, foot);
     document.body.append(drawer);
+    requestAnimationFrame(() => drawer && drawer.classList.add('is-in'));
   }
 
   function focusComment(id) {
