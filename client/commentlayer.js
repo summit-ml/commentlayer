@@ -340,7 +340,13 @@ function init(cfg) {
     const counts = c.reactions || {};
     const mine = c.myReactions || [];
     const toggle = async emoji => {
-      try { await api('POST', `${API}/${c.id}/react`, { emoji }); await refresh(); if (drawer) await openDrawer(); } catch (err) { toast(err.message); }
+      const inPop = !!row.closest('.cl-pop');
+      try {
+        await api('POST', `${API}/${c.id}/react`, { emoji });
+        await refresh();
+        if (drawer) await openDrawer();
+        if (inPop) { const fresh = comments.find(x => x.id === c.id); const pin = layer.querySelector(`[data-id="${c.id}"]`); if (fresh && pin) openPop(fresh, pin); }
+      } catch (err) { toast(err.message); }
     };
     REACTIONS.filter(e => counts[e]).forEach(e => row.append(el('button', { class: 'cl-react-chip' + (mine.includes(e) ? ' is-mine' : ''), type: 'button', title: mine.includes(e) ? 'Remove your reaction' : 'React', onclick: () => toggle(e) }, [e + ' ', el('span', { text: String(counts[e]) })])));
     const picker = el('span', { class: 'cl-react-picker' });
@@ -417,7 +423,7 @@ function init(cfg) {
     if (c.version !== currentVersion) pop.append(el('div', { style: 'margin-bottom:8px' }, [el('span', { class: 'cl-round-pill', text: roundLabel(c.version) })]));
     if (c.resolved) pop.append(el('div', { style: 'margin-bottom:8px' }, [el('span', { class: 'cl-resolved-tag', text: 'Resolved' })]));
     const text = el('p', { class: 'cl-text', text: c.text });
-    pop.append(text);
+    pop.append(text, reactionRow(c));
     const actions = el('div', { class: 'cl-actions' });
     actions.append(el('button', { type: 'button', text: c.resolved ? 'Reopen' : 'Resolve', onclick: async () => {
       try { const u = await api('PATCH', `${API}/${c.id}`, { resolved: !c.resolved }); Object.assign(c, u); await refresh(); toast(u.resolved ? 'Marked resolved.' : 'Reopened.'); } catch (err) { toast(err.message); }

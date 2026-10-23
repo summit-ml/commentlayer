@@ -189,6 +189,7 @@ body:has(> .cl-layer.cl-on) .cl-ui button, body:has(> .cl-layer.cl-on) .cl-ui a,
 
 /* ── reactions ───────────────────────────────────────────────────────── */
 .cl-react { display: flex; align-items: center; gap: 4px; margin-top: 6px; min-height: 20px; }
+.cl-pop .cl-react { margin: -4px 0 10px; }
 .cl-react-chip { display: inline-flex; align-items: center; gap: 2px; height: 20px; padding: 0 7px; border: 1px solid var(--cl-surface-line); border-radius: 999px; background: transparent; color: var(--cl-fg); font: 11px/1 var(--cl-font); cursor: pointer; transition: border-color 140ms, background 140ms; }
 .cl-react-chip span { color: var(--cl-fg-soft); }
 .cl-react-chip.is-mine { border-color: var(--cl-accent); background: color-mix(in srgb, var(--cl-accent) 14%, transparent); }
