@@ -1,22 +1,46 @@
 {
-  "name": "@summit/commentlayer",
+  "name": "commentlayer",
   "version": "0.1.0",
-  "private": true,
-  "type": "module",
   "description": "Drop-a-pin review comments for any site: a client overlay plus a storage-backed request handler.",
+  "license": "MIT",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/summit-ml/commentlayer.git"
+  },
+  "homepage": "https://summitml.com/products/open-source",
+  "keywords": [
+    "review",
+    "comments",
+    "annotations",
+    "feedback",
+    "browser-extension",
+    "cloudflare-workers"
+  ],
   "exports": {
     ".": "./src/index.ts",
     "./core": "./src/core.ts"
   },
+  "files": [
+    "src",
+    "client",
+    "worker",
+    "extension/src",
+    "scripts",
+    "LICENSE",
+    "README.md"
+  ],
   "scripts": {
     "build": "node scripts/build.mjs",
     "typecheck": "tsc --noEmit && tsc --noEmit -p worker",
     "test": "node --experimental-strip-types --test test/*.test.mjs"
   },
+  "engines": {
+    "node": ">=22"
+  },
   "devDependencies": {
     "@cloudflare/workers-types": "^4",
     "@types/node": "^22",
     "typescript": "^5"
-  },
-  "license": "MIT"
+  }
 }

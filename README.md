@@ -3,6 +3,11 @@
 Drop a pin, leave a note. Review comments on any website, stored wherever you choose.
 MIT licensed. Built by [Summit ML](https://summitml.com/products/open-source).
 
+```sh
+git clone https://github.com/summit-ml/commentlayer
+cd commentlayer && npm install && npm test && npm run build
+```
+
 **What reviewers get.** A bar at the bottom of every page with a "Turn on" button. They enter
 a name once (no account), then click anything on the page to drop a numbered pin and leave a
 note. "Comments" opens a drawer listing every note across the site with jump links and CSV and
@@ -20,7 +25,7 @@ rename rounds, and older rounds are viewable read-only.
 ```
 
 ```ts
-import { createCommentStore, createHandler, filePersistence } from "@summit/commentlayer";
+import { createCommentStore, createHandler, filePersistence } from "commentlayer";
 
 const store = createCommentStore({
   persistence: filePersistence(process.env.COMMENTLAYER_DATA_DIR ?? "./data"),
@@ -48,6 +53,12 @@ and path, so one backend serves every site the team reviews.
 
 The extension needs a backend with CORS enabled (the Worker has it) or any backend at all,
 since requests go through the extension's service worker.
+
+## Developing
+
+`npm run typecheck`, `npm test`, and `npm run build` (which writes `extension/dist` and copies the
+overlay into `worker/public`). Node 22 or newer. The code is plain TypeScript consumed as source;
+there is no bundling step for the library yet.
 
 ## Pieces
 
