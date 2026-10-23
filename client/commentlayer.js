@@ -149,7 +149,28 @@ function init(cfg) {
 
   const bar = el('div', { class: 'cl-bar cl-ui' });
   const layer = el('div', { class: 'cl-layer cl-ui' });
+  const goo = el('div', { class: 'cl-goo', 'aria-hidden': 'true' }, [el('span', { class: 'cl-goo-panel' }), el('span', { class: 'cl-goo-tab' })]);
   document.body.append(bar, layer);
+  if (!document.getElementById('cl-goo-filter')) {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', '0'); svg.setAttribute('height', '0'); svg.setAttribute('aria-hidden', 'true');
+    svg.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden';
+    svg.innerHTML = '<filter id="cl-goo-filter"><feGaussianBlur in="SourceGraphic" stdDeviation="7" result="b"/><feColorMatrix in="b" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -10" result="g"/><feComposite in="SourceGraphic" in2="g" operator="atop"/></filter>';
+    document.body.append(svg);
+  }
+  const sizer = new ResizeObserver(entries => {
+    entries.forEach(e => {
+      const t = e.target;
+      if (t.classList.contains('cl-tab')) bar.style.setProperty('--cl-tab-w', t.offsetWidth + 'px');
+      else { bar.style.setProperty('--cl-panel-w', t.offsetWidth + 'px'); bar.style.setProperty('--cl-panel-h', t.offsetHeight + 'px'); }
+    });
+  });
+  function mountDock(panel, tab) {
+    bar.append(goo, panel, tab);
+    sizer.disconnect();
+    sizer.observe(panel);
+    sizer.observe(tab);
+  }
 
   function renderBar() {
     bar.replaceChildren();
@@ -209,7 +230,7 @@ function init(cfg) {
           el('button', { type: 'button', text: 'Cancel', onclick: () => { themeOpen = false; renderBar(); } })
         ])
       ]);
-      bar.append(el('div', { class: 'cl-panel', role: 'group', 'aria-label': 'CommentLayer theme' }, [
+      mountDock(el('div', { class: 'cl-panel', role: 'group', 'aria-label': 'CommentLayer theme' }, [
         el('div', { class: 'cl-head' }, [el('div', { class: 'cl-head-text' }, [el('b', { text: 'Theme' }), el('small', { text: 'Colors for CommentLayer on ' + location.host })])]),
         form
       ]), themeTab());
@@ -226,7 +247,7 @@ function init(cfg) {
         : el('span', { class: 'cl-round', text: roundLabel(view).toUpperCase() })
     ]);
 
-    bar.append(el('div', { class: 'cl-panel', role: 'group', 'aria-label': 'CommentLayer' }, [head, list, foot]), themeTab());
+    mountDock(el('div', { class: 'cl-panel', role: 'group', 'aria-label': 'CommentLayer' }, [head, list, foot]), themeTab());
   }
 
   function themeTab() {
