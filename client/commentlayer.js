@@ -27,7 +27,16 @@ function init(cfg) {
   const token = ls.get('cl-token') || (() => { const t = crypto.randomUUID(); ls.set('cl-token', t); return t; })();
   const adminMatch = location.hash.match(/^#cl-admin=(.+)$/);
   if (adminMatch) { ls.set('cl-admin', decodeURIComponent(adminMatch[1])); history.replaceState(null, '', location.pathname); }
-  const admin = ls.get('cl-admin') || '';
+  let admin = ls.get('cl-admin') || '';
+  // Asks for the admin token the first time an admin action is tried; forgets it if the backend rejects it.
+  const ensureAdmin = () => {
+    if (admin) return true;
+    const t = prompt('This needs the admin token for this CommentLayer backend.');
+    if (!t || !t.trim()) return false;
+    admin = t.trim(); ls.set('cl-admin', admin);
+    return true;
+  };
+  const adminFailed = err => { if (/admin/i.test(err.message)) { admin = ''; ls.set('cl-admin', ''); toast("That admin token didn't work."); } else toast(err.message); };
   let name = ls.get('cl-name') || '';
   let mode = ss.get('cl-mode') === 'on';
   let comments = [];
@@ -414,10 +423,11 @@ function init(cfg) {
 
     const rounds = el('div', { class: 'cl-rounds', role: 'tablist', 'aria-label': 'Review rounds' });
     versions.forEach(v => rounds.append(el('button', { type: 'button', role: 'tab', class: v.id === view ? 'cl-round-active' : '', 'aria-selected': String(v.id === view), title: v.id === currentVersion ? 'Current round' : 'Started ' + when(v.createdAt), onclick: () => { setView(v.id); openDrawer(); } }, [v.label + ' ', el('span', { class: 'cl-count', text: String(v.count) })])));
-    if (admin) rounds.append(el('button', { type: 'button', class: 'cl-round-new', text: '+ New round', onclick: async () => {
+    rounds.append(el('button', { type: 'button', class: 'cl-round-new', text: '+ New round', title: admin ? 'Start a new review round' : 'Needs the admin token', onclick: async () => {
+      if (!ensureAdmin()) return;
       const label = prompt('Name for the new review round', `Round ${versions.length + 1}`);
       if (label === null) return;
-      try { const r = await api('POST', VERSIONS, { label: label.trim() || undefined }); await refresh(); setView(r.id); await openDrawer(); toast(r.label + ' started. Older comments are stored under their own rounds.'); } catch (err) { toast(err.message); }
+      try { const r = await api('POST', VERSIONS, { label: label.trim() || undefined }); await refresh(); setView(r.id); await openDrawer(); toast(r.label + ' started. Older comments are stored under their own rounds.'); } catch (err) { adminFailed(err); }
     } }));
 
     const body = el('div', { class: 'cl-drawer-body' });
@@ -455,10 +465,11 @@ function init(cfg) {
       el('a', { href: `${API}.csv`, text: 'Export CSV' }),
       el('a', { href: API, target: '_blank', rel: 'noopener', text: 'Export JSON' })
     ]);
-    if (admin && viewingOld()) foot.append(el('button', { type: 'button', text: 'Rename round', onclick: async () => {
+    foot.append(el('button', { type: 'button', text: 'Rename round', onclick: async () => {
+      if (!ensureAdmin()) return;
       const label = prompt('Rename this round', roundLabel(view));
       if (!label || !label.trim()) return;
-      try { await api('PATCH', `${VERSIONS}/${view}`, { label: label.trim() }); await refresh(); await openDrawer(); } catch (err) { toast(err.message); }
+      try { await api('PATCH', `${VERSIONS}/${view}`, { label: label.trim() }); await refresh(); await openDrawer(); } catch (err) { adminFailed(err); }
     } }));
     foot.append(el('span', { class: 'cl-spacer' }), el('span', { class: 'cl-round', text: `${shown.filter(c => !c.resolved).length} OPEN · ${shown.filter(c => c.resolved).length} RESOLVED` }));
 
