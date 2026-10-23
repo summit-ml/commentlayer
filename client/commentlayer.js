@@ -120,7 +120,7 @@ function init(cfg) {
     valentines: '<path d="M12 21s-7.5-4.6-9.6-9.3C1 8.6 3.2 5 6.6 5c2 0 3.6 1 4.4 2.4C11.8 6 13.4 5 15.4 5c3.4 0 5.6 3.6 4.2 6.7C19.5 16.4 12 21 12 21z"/>',
     stpatricks: '<circle cx="12" cy="7" r="3.6"/><circle cx="7.2" cy="12.2" r="3.6"/><circle cx="16.8" cy="12.2" r="3.6"/><path d="M11 14h2l.6 7h-3.2z"/>',
     july4: '<path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.8L5.7 21l1.7-7L2 9.2l7.1-.6z"/>',
-    thanksgiving: '<path d="M4 20C4 11 9.5 4.5 21 3c-.8 11-6.5 16.6-15.5 17.2L4 20z"/><path d="M4 20l9-9" stroke="var(--cl-bg)" stroke-width="1.6" fill="none"/>',
+    thanksgiving: '<path d="M3 14.5a9 9 0 0 1 18 0z"/><circle cx="3.8" cy="10.7" r="2.5"/><circle cx="7.2" cy="6.9" r="2.5"/><circle cx="12" cy="5.5" r="2.5"/><circle cx="16.8" cy="6.9" r="2.5"/><circle cx="20.2" cy="10.7" r="2.5"/><path d="M9.8 12.5L4.9 8.1M11.2 11.6L9.4 5.4M12.8 11.6l1.8-6.2M14.2 12.5l4.9-4.4" stroke="var(--cl-bg)" stroke-width="1.8" fill="none" stroke-linecap="round"/><ellipse cx="12.8" cy="17.3" rx="5.4" ry="4.2"/><circle cx="5.4" cy="14.6" r="2.5"/><path d="M3.2 13.8l-2.6 1 2.6 1z"/>',
     christmas: '<path d="M12 2l4.5 6.5h-2.6l3.8 5h-2.5l3.8 5.5H5l3.8-5.5H6.3l3.8-5H7.5z"/><path d="M10.5 19h3v3h-3z"/>',
     newyear: '<path d="M12 1.5l2.2 7.3 7.3 2.2-7.3 2.2L12 20.5l-2.2-7.3-7.3-2.2 7.3-2.2z"/>'
   };
