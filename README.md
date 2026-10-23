@@ -74,6 +74,15 @@ tokens (`--cl-accent`, `--cl-bg`, `--cl-fg`, `--cl-surface`, `--cl-font`, and so
 in the host's stylesheet. The three brand tokens themselves are written by the overlay at
 runtime, so set those through the options above rather than CSS.
 
+## Holidays
+
+On a handful of days the status dot in the pill turns into a small icon in the same colors:
+a pumpkin for Halloween (October 30 and 31), a heart on Valentine's Day, a clover on St.
+Patrick's Day, a star on the Fourth of July, a leaf on US Thanksgiving, a tree on December 24
+and 25, and a sparkle on New Year's Eve and Day. Force one with `data-holiday="halloween"` on
+the script tag (or `holiday` in the config) to preview it, or turn them off with
+`data-holiday="off"`.
+
 ## Developing
 
 `npm run typecheck`, `npm test`, and `npm run build` (which writes `extension/dist` and copies the

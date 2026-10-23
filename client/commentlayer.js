@@ -114,6 +114,37 @@ function init(cfg) {
     applyTheme();
   }
   let themeOpen = false;
+  // ── holidays: the status dot becomes a small icon on the day ──────────────────
+  const HOLIDAY_ICONS = {
+    halloween: '<path d="M11 3h2v4h-2z"/><path d="M8 7c-3.3 0-6 3.1-6 7s2.7 7 6 7c1.5 0 2.9-.5 4-1.4 1.1.9 2.5 1.4 4 1.4 3.3 0 6-3.1 6-7s-2.7-7-6-7c-1.5 0-2.9.5-4 1.4C10.9 7.5 9.5 7 8 7z"/><path d="M9.2 8.6c-1.1 2.2-1.1 8.6 0 10.8M14.8 8.6c1.1 2.2 1.1 8.6 0 10.8" stroke="var(--cl-bg)" stroke-width="1.3" fill="none" stroke-linecap="round"/>',
+    valentines: '<path d="M12 21s-7.5-4.6-9.6-9.3C1 8.6 3.2 5 6.6 5c2 0 3.6 1 4.4 2.4C11.8 6 13.4 5 15.4 5c3.4 0 5.6 3.6 4.2 6.7C19.5 16.4 12 21 12 21z"/>',
+    stpatricks: '<circle cx="12" cy="7" r="3.6"/><circle cx="7.2" cy="12.2" r="3.6"/><circle cx="16.8" cy="12.2" r="3.6"/><path d="M11 14h2l.6 7h-3.2z"/>',
+    july4: '<path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.8L5.7 21l1.7-7L2 9.2l7.1-.6z"/>',
+    thanksgiving: '<path d="M4 20C4 11 9.5 4.5 21 3c-.8 11-6.5 16.6-15.5 17.2L4 20z"/><path d="M4 20l9-9" stroke="var(--cl-bg)" stroke-width="1.6" fill="none"/>',
+    christmas: '<path d="M12 2l4.5 6.5h-2.6l3.8 5h-2.5l3.8 5.5H5l3.8-5.5H6.3l3.8-5H7.5z"/><path d="M10.5 19h3v3h-3z"/>',
+    newyear: '<path d="M12 1.5l2.2 7.3 7.3 2.2-7.3 2.2L12 20.5l-2.2-7.3-7.3-2.2 7.3-2.2z"/>'
+  };
+  const nthWeekday = (year, month, weekday, n) => { const d = new Date(year, month, 1); const offset = (weekday - d.getDay() + 7) % 7; return 1 + offset + (n - 1) * 7; };
+  function holidayFor(date) {
+    const m = date.getMonth(), d = date.getDate(), y = date.getFullYear();
+    if (m === 9 && d >= 30) return 'halloween';
+    if (m === 1 && d === 14) return 'valentines';
+    if (m === 2 && d === 17) return 'stpatricks';
+    if (m === 6 && d === 4) return 'july4';
+    if (m === 10 && d === nthWeekday(y, 10, 4, 4)) return 'thanksgiving';
+    if (m === 11 && (d === 24 || d === 25)) return 'christmas';
+    if ((m === 11 && d === 31) || (m === 0 && d === 1)) return 'newyear';
+    return '';
+  }
+  const holidaySetting = (script && script.dataset.holiday) || (cfg.holiday !== undefined ? String(cfg.holiday) : '');
+  const holiday = holidaySetting === 'off' ? '' : HOLIDAY_ICONS[holidaySetting] ? holidaySetting : holidayFor(new Date());
+  function statusDot() {
+    if (!holiday) return el('span', { class: 'cl-dot' });
+    const dot = el('span', { class: 'cl-dot cl-dot-icon', title: 'Happy ' + ({ halloween: 'Halloween', valentines: "Valentine's Day", stpatricks: "St. Patrick's Day", july4: 'Fourth of July', thanksgiving: 'Thanksgiving', christmas: 'holidays', newyear: 'New Year' })[holiday] + ' from CommentLayer' });
+    dot.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' + HOLIDAY_ICONS[holiday] + '</svg>';
+    return dot;
+  }
+
   const when = iso => new Date(iso).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
   const pageLabel = p => p === '/' ? 'Home' : p.replace(/^\//, '').split('/').map(s => s.replace(/-/g, ' ')).join(' / ').replace(/^\w/, c => c.toUpperCase());
   let toastTimer;
@@ -253,7 +284,7 @@ function init(cfg) {
   function themeTab() {
     const open = comments.filter(c => !c.resolved).length;
     const tab = el('button', { class: 'cl-tab', type: 'button', 'aria-expanded': String(bar.classList.contains('is-open')), onclick: () => { const o = bar.classList.toggle('is-open'); if (!o) themeOpen = false; tab.setAttribute('aria-expanded', String(o)); if (!o) renderBar(); } }, [
-      el('span', { class: 'cl-dot' }),
+      statusDot(),
       (viewingOld() ? roundLabel(view) : 'Comments') + ' ',
       el('span', { class: 'cl-count', text: `(${open})` })
     ]);
