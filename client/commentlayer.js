@@ -8,7 +8,7 @@
 function init(cfg) {
   if (document.querySelector('.cl-bar')) return;
   const VERSION = '0.1.0';
-  const ABOUT_URL = 'https://summitml.com/products/open-source';
+  const ABOUT_URL = 'https://summitml.com/products/open-source#commentlayer';
   const REPO_URL = 'https://github.com/summit-ml/commentlayer';
   const BASE = (scriptApi || cfg.api || '/api/commentlayer').replace(/\/$/, '');
   const API = BASE + '/comments';
