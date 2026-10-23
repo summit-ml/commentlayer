@@ -103,26 +103,51 @@ function init(cfg) {
 
   function renderBar() {
     bar.replaceChildren();
-    const open = all.filter(c => c.version === view && !c.resolved).length;
+    const here = comments.slice().sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+    const open = here.filter(c => !c.resolved).length;
+    bar.dataset.on = mode ? 'true' : 'false';
+
+    const head = el('div', { class: 'cl-head' });
     if (mode && !name) {
       const input = el('input', { type: 'text', placeholder: 'Your name', maxlength: '80', 'aria-label': 'Your name' });
-      const form = el('form', { class: 'cl-name-form', onsubmit: e => { e.preventDefault(); const v = input.value.trim(); if (!v) return; name = v; ls.set('cl-name', v); renderBar(); toast('Click anywhere on the page to leave a comment.'); } }, [
-        el('span', { class: 'cl-label', text: 'Comment as' }), input,
-        el('button', { class: 'cl-primary', type: 'submit', text: 'Start' }),
-        el('button', { class: 'cl-off', type: 'button', text: 'Cancel', onclick: () => setMode(false) })
+      const form = el('form', { class: 'cl-name-form', onsubmit: e => { e.preventDefault(); const v = input.value.trim(); if (!v) return; name = v; ls.set('cl-name', v); bar.classList.remove('is-open'); renderBar(); toast('Click anywhere on the page to leave a comment.'); } }, [
+        input, el('button', { class: 'cl-primary', type: 'submit', text: 'Start' })
       ]);
-      bar.append(form);
+      head.append(el('div', { class: 'cl-head-text' }, [el('b', { text: 'Comment as' }), form]));
       setTimeout(() => input.focus(), 0);
-      return;
+    } else {
+      const sub = el('small', { class: name ? 'cl-who-btn' : '', title: name ? 'Change name' : '', text: name ? name + (admin ? ' · admin' : '') + (mode ? ' · click anything to leave a note' : '') : 'Turn on to leave a note' });
+      if (name) sub.addEventListener('click', () => { name = ''; if (mode) renderBar(); else setMode(true); bar.classList.add('is-open'); });
+      head.append(
+        el('div', { class: 'cl-head-text' }, [el('b', { text: 'Commenting' }), sub]),
+        el('button', { class: 'cl-switch', type: 'button', role: 'switch', 'aria-checked': String(mode), 'aria-label': mode ? 'Turn commenting off' : 'Turn commenting on', onclick: () => setMode(!mode) }));
     }
-    const label = el('span', { class: 'cl-label' });
-    label.append('CommentLayer ', el('b', { text: mode ? 'on' : 'off' }));
-    bar.append(label);
-    if (viewingOld()) bar.append(el('button', { class: 'cl-round-tag', type: 'button', text: 'Viewing ' + roundLabel(view) + ' · back to ' + roundLabel(currentVersion), title: 'Return to the current round', onclick: () => setView(currentVersion) }));
-    bar.append(
-      el('button', { class: mode ? '' : 'cl-primary', type: 'button', text: mode ? 'Turn off' : 'Turn on', onclick: () => setMode(!mode) }),
-      el('button', { type: 'button', text: `${viewingOld() ? roundLabel(view) : 'Comments'} (${open})`, onclick: openDrawer }));
-    if (mode && name) bar.append(el('button', { class: 'cl-off', type: 'button', text: name + (admin ? ' · admin' : ''), title: 'Change name', onclick: () => { name = ''; renderBar(); } }));
+
+    const list = el('div', { class: 'cl-peek-list' });
+    if (!here.length) list.append(el('div', { class: 'cl-peek-empty', text: mode ? 'No notes on this page yet. Click anything to leave one.' : 'No notes on this page yet.' }));
+    here.forEach((c, i) => list.append(el('a', { class: 'cl-peek' + (c.resolved ? ' cl-peek-resolved' : ''), href: '#cl-' + c.id, onclick: e => { e.preventDefault(); bar.classList.remove('is-open'); focusComment(c.id); } }, [
+      el('span', { class: 'cl-peek-n', text: String(i + 1) }),
+      el('span', { class: 'cl-peek-body' }, [
+        el('span', { class: 'cl-peek-who' }, [el('b', { text: c.author }), ' · ' + when(c.createdAt)]),
+        el('span', { class: 'cl-peek-text', text: c.text })
+      ])
+    ])));
+
+    const foot = el('div', { class: 'cl-foot' }, [
+      el('button', { type: 'button', text: 'All comments', onclick: () => { bar.classList.remove('is-open'); openDrawer(); } }),
+      el('a', { href: BASE + '/comments.csv', text: 'Export' }),
+      el('span', { class: 'cl-spacer' }),
+      viewingOld()
+        ? el('button', { class: 'cl-round', type: 'button', text: 'Viewing ' + roundLabel(view) + ' · back', title: 'Return to ' + roundLabel(currentVersion), onclick: () => setView(currentVersion) })
+        : el('span', { class: 'cl-round', text: roundLabel(view).toUpperCase() })
+    ]);
+
+    const tab = el('button', { class: 'cl-tab', type: 'button', 'aria-expanded': String(bar.classList.contains('is-open')), onclick: () => { const o = bar.classList.toggle('is-open'); tab.setAttribute('aria-expanded', String(o)); } }, [
+      el('span', { class: 'cl-dot' }),
+      (viewingOld() ? roundLabel(view) : 'Comments') + ' ',
+      el('span', { class: 'cl-count', text: `(${open})` })
+    ]);
+    bar.append(el('div', { class: 'cl-panel', role: 'group', 'aria-label': 'CommentLayer' }, [head, list, foot]), tab);
   }
 
   function setMode(on) {
@@ -130,6 +155,7 @@ function init(cfg) {
     ss.set('cl-mode', on ? 'on' : 'off');
     layer.classList.toggle('cl-on', on);
     closePop();
+    if (on && !name) bar.classList.add('is-open');
     renderBar();
     if (on) { renderPins(); if (name) toast('Click anywhere on the page to leave a comment.'); }
   }
@@ -309,7 +335,7 @@ function init(cfg) {
     if (!name) { renderBar(); return; }
     openNew(e);
   }, true);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closePop(); closeDrawer(); } });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closePop(); closeDrawer(); bar.classList.remove('is-open'); } });
   let raf = 0;
   const relayout = () => { if (!mode) return; cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { renderPins(); if (activePop) closePop(); }); };
   window.addEventListener('resize', relayout);

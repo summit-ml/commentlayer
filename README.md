@@ -8,12 +8,13 @@ git clone https://github.com/summit-ml/commentlayer
 cd commentlayer && npm install && npm test && npm run build
 ```
 
-**What reviewers get.** A bar at the bottom of every page with a "Turn on" button. They enter
-a name once (no account), then click anything on the page to drop a numbered pin and leave a
-note. "Comments" opens a drawer listing every note across the site with jump links and CSV and
-JSON export. Anyone can resolve a note; only its author can edit or delete it, tracked by a
-random token in their browser. Comments are grouped into review rounds; an admin can start or
-rename rounds, and older rounds are viewable read-only.
+**What reviewers get.** A small pill in the bottom-right corner that says how many notes are on
+the page. Hovering (or tapping) grows a panel out of it: a switch to turn commenting on, the
+page's notes with jump links, and a footer with the full drawer, export, and the review round.
+Reviewers enter a name once (no account), then click anything on the page to drop a numbered
+pin and leave a note. Anyone can resolve a note; only its author can edit or delete it, tracked
+by a random token in their browser. Comments are grouped into review rounds; an admin can start
+or rename rounds, and older rounds are viewable read-only.
 
 ## Three ways to use it
 
