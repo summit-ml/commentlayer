@@ -53,18 +53,23 @@ test("validates input and answers preflight", async () => {
   assert.equal(pre.headers.get("access-control-allow-origin"), "*");
 });
 
-test("reactions toggle per person and come back as counts", async () => {
+test("votes are one per person, exclusive, and come back as counts only", async () => {
   const handle = await boot();
   const c = await (await call(handle, "POST", "/comments", { body: { page: "/", selector: "h1", x: 0.5, y: 0.2, author: "Ann", text: "Nice" }, token: "ann" })).json();
-  let r = await (await call(handle, "POST", `/comments/${c.id}/react`, { body: { emoji: "👍" }, token: "bob" })).json();
-  assert.deepEqual(r.reactions, { "👍": 1 });
-  assert.deepEqual(r.myReactions, ["👍"]);
-  r = await (await call(handle, "POST", `/comments/${c.id}/react`, { body: { emoji: "👍" }, token: "ann" })).json();
-  assert.deepEqual(r.reactions, { "👍": 2 });
-  r = await (await call(handle, "POST", `/comments/${c.id}/react`, { body: { emoji: "👍" }, token: "bob" })).json();
-  assert.deepEqual(r.reactions, { "👍": 1 });
-  assert.deepEqual(r.myReactions, []);
-  assert.equal((await call(handle, "POST", `/comments/${c.id}/react`, { body: { emoji: "🤡" }, token: "bob" })).status, 400);
-  const list = await (await call(handle, "GET", "/comments", { token: "ann" })).json();
-  assert.deepEqual(list[0].myReactions, ["👍"]);
+  let r = await (await call(handle, "POST", `/comments/${c.id}/vote`, { body: { vote: "up" }, token: "bob" })).json();
+  assert.deepEqual(r.votes, { up: 1, down: 0 });
+  assert.equal(r.myVote, "up");
+  r = await (await call(handle, "POST", `/comments/${c.id}/vote`, { body: { vote: "up" }, token: "ann" })).json();
+  assert.deepEqual(r.votes, { up: 2, down: 0 });
+  r = await (await call(handle, "POST", `/comments/${c.id}/vote`, { body: { vote: "down" }, token: "bob" })).json();
+  assert.deepEqual(r.votes, { up: 1, down: 1 });
+  assert.equal(r.myVote, "down");
+  r = await (await call(handle, "POST", `/comments/${c.id}/vote`, { body: { vote: "down" }, token: "bob" })).json();
+  assert.deepEqual(r.votes, { up: 1, down: 0 });
+  assert.equal(r.myVote, null);
+  assert.equal((await call(handle, "POST", `/comments/${c.id}/vote`, { body: { vote: "sideways" }, token: "bob" })).status, 400);
+  const asCarol = await (await call(handle, "GET", "/comments", { token: "carol" })).json();
+  assert.deepEqual(asCarol[0].votes, { up: 1, down: 0 });
+  assert.equal(asCarol[0].myVote, null);
+  assert.equal("reactions" in asCarol[0], false);
 });

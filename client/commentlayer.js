@@ -333,28 +333,26 @@ function init(cfg) {
     return wrap;
   }
 
-  // Reactions: a small smiley that unfolds on hover into the four choices; chips show counts.
-  const REACTIONS = ['👍', '👎', '❤️', '⬆️'];
+  // Votes: an up and a down arrow with counts. One vote per person, anonymous to everyone else.
+  const ARROW = { up: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14l6-6 6 6"/></svg>', down: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10l6 6 6-6"/></svg>' };
   function reactionRow(c) {
-    const row = el('span', { class: 'cl-react', onclick: e => { e.preventDefault(); e.stopPropagation(); } });
-    const counts = c.reactions || {};
-    const mine = c.myReactions || [];
-    const toggle = async emoji => {
+    const row = el('span', { class: 'cl-vote', onclick: e => { e.preventDefault(); e.stopPropagation(); } });
+    const votes = c.votes || { up: 0, down: 0 };
+    const cast = async vote => {
       const inPop = !!row.closest('.cl-pop');
       try {
-        await api('POST', `${API}/${c.id}/react`, { emoji });
+        await api('POST', `${API}/${c.id}/vote`, { vote });
         await refresh();
         if (drawer) await openDrawer();
         if (inPop) { const fresh = comments.find(x => x.id === c.id); const pin = layer.querySelector(`[data-id="${c.id}"]`); if (fresh && pin) openPop(fresh, pin); }
       } catch (err) { toast(err.message); }
     };
-    REACTIONS.filter(e => counts[e]).forEach(e => row.append(el('button', { class: 'cl-react-chip' + (mine.includes(e) ? ' is-mine' : ''), type: 'button', title: mine.includes(e) ? 'Remove your reaction' : 'React', onclick: () => toggle(e) }, [e + ' ', el('span', { text: String(counts[e]) })])));
-    const picker = el('span', { class: 'cl-react-picker' });
-    picker.innerHTML = '<svg class="cl-react-smile" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5c1 1.3 2.2 2 3.5 2s2.5-.7 3.5-2"/><circle cx="9" cy="10" r=".6" fill="currentColor"/><circle cx="15" cy="10" r=".6" fill="currentColor"/></svg>';
-    const choices = el('span', { class: 'cl-react-choices' });
-    REACTIONS.forEach((e, i) => choices.append(el('button', { class: 'cl-react-choice' + (mine.includes(e) ? ' is-mine' : ''), type: 'button', text: e, title: ({ '👍': 'Agree', '👎': 'Disagree', '❤️': 'Love it', '⬆️': 'Bump' })[e], style: `--i:${i}`, onclick: () => toggle(e) })));
-    picker.append(choices);
-    row.append(picker);
+    ['up', 'down'].forEach(v => {
+      const b = el('button', { class: 'cl-vote-btn' + (c.myVote === v ? ' is-mine' : ''), type: 'button', title: c.myVote === v ? 'Remove your vote' : (v === 'up' ? 'Upvote' : 'Downvote'), 'aria-pressed': String(c.myVote === v), onclick: () => cast(v) });
+      b.innerHTML = ARROW[v];
+      b.append(el('span', { text: String(votes[v] || 0) }));
+      row.append(b);
+    });
     return row;
   }
 
