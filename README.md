@@ -1,7 +1,7 @@
 # CommentLayer
 
-Drop a pin, leave a note. Review comments on any website, stored wherever you choose.
-MIT licensed. Built by [Summit ML](https://summitml.com/products/open-source).
+Drop a pin, leave a note. Private review comments on any website, stored wherever you choose:
+only the people you share with see them, and nothing is ever posted publicly. MIT licensed. Built by [Summit ML](https://summitml.com/products/open-source).
 
 ```sh
 git clone https://github.com/summit-ml/commentlayer

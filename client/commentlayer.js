@@ -229,10 +229,10 @@ function init(cfg) {
       const form = el('form', { class: 'cl-name-form', onsubmit: e => { e.preventDefault(); const v = input.value.trim(); if (!v) return; name = v; ls.set('cl-name', v); bar.classList.remove('is-open'); renderBar(); toast('Click anywhere on the page to leave a comment.'); } }, [
         input, el('button', { class: 'cl-primary', type: 'submit', text: 'Start' })
       ]);
-      head.append(el('div', { class: 'cl-head-text' }, [el('b', { text: 'Comment as' }), form]));
+      head.append(el('div', { class: 'cl-head-text' }, [el('b', { text: 'Comment as' }), form, el('small', { class: 'cl-private', text: 'Private to this layer. Nothing you write here is public.' })]));
       setTimeout(() => input.focus(), 0);
     } else {
-      const sub = el('small', { class: name ? 'cl-who-btn' : '', title: name ? 'Change name' : '', text: name ? name + (admin ? ' · admin' : '') + (mode ? ' · click anything to leave a note' : '') : 'Turn on to leave a note' });
+      const sub = el('small', { class: name ? 'cl-who-btn' : '', title: name ? 'Change name' : '', text: name ? name + (admin ? ' · admin' : '') + (mode ? ' · click anything to leave a note' : ' · private to this layer') : 'Turn on to leave a private note' });
       if (name) sub.addEventListener('click', () => { name = ''; if (mode) renderBar(); else setMode(true); bar.classList.add('is-open'); });
       head.append(
         el('div', { class: 'cl-head-text' }, [el('b', { text: 'Commenting' }), sub]),
