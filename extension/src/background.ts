@@ -100,7 +100,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
             await chrome.storage.local.set({ "cl-name": name });
           }
         }
-        reply({ enabled: !!layer, api: layer ? (layer.type === "backend" ? layer.api : LOCAL_BASE) : "", layer: layer ? { id: layer.id, name: layer.name, type: layer.type } : null, values: s.values });
+        reply({ enabled: !!layer, api: layer ? (layer.type === "backend" ? layer.api : LOCAL_BASE) : "", layer: layer ? { id: layer.id, name: layer.name, type: layer.type, url: layer.type === 'sheet' ? layer.url : null } : null, values: s.values });
       } else if (msg.type === "set") {
         await chrome.storage.local.set({ [msg.key]: msg.value });
         if (msg.key === "cl-admin") stores.clear();

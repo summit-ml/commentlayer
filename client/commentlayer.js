@@ -284,7 +284,7 @@ function init(cfg) {
 
     const foot = el('div', { class: 'cl-foot' }, [
       el('button', { type: 'button', text: 'All comments', onclick: () => { bar.classList.remove('is-open'); openDrawer(); } }),
-      exportLink('Export', BASE + '/comments.csv', 'comments.csv', 'text/csv'),
+      exportMenu('Export'),
       el('button', { type: 'button', text: 'Theme', onclick: () => { themeOpen = true; bar.classList.add('is-open'); renderBar(); } }),
       el('span', { class: 'cl-spacer' }),
       viewingOld()
@@ -295,20 +295,41 @@ function init(cfg) {
     mountDock(el('div', { class: 'cl-panel', role: 'group', 'aria-label': 'CommentLayer' }, [head, list, foot]), themeTab());
   }
 
-  // Export links: a plain href on an embed; through the host's fetch (and a Blob) when the API is not a real URL.
-  function exportLink(label, url, filename, mime) {
-    if (!cfg.fetch) return el('a', { href: url, target: filename.endsWith('.json') ? '_blank' : null, rel: 'noopener', text: label });
-    return el('button', { type: 'button', text: label, onclick: async () => {
-      try {
-        const res = await doFetch(url, { method: 'GET', headers: { 'X-Comment-Token': token } });
-        const content = mime === 'text/csv' ? await res.text() : JSON.stringify(await res.json(), null, 2);
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(new Blob([content], { type: mime }));
-        a.download = filename;
-        a.click();
-        setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-      } catch (err) { toast(err.message); }
+  // Downloads through fetch and a Blob so it works whether the API is a real URL or the extension's in-process store.
+  async function download(url, filename, mime) {
+    try {
+      const res = await doFetch(url, { method: 'GET', headers: { 'X-Comment-Token': token } });
+      if (!res.ok) throw new Error('Export failed.');
+      const content = mime === 'text/csv' ? await res.text() : JSON.stringify(await res.json(), null, 2);
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([content], { type: mime }));
+      a.download = filename;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    } catch (err) { toast(err.message); }
+  }
+  // One Export button that opens a small menu: the sheet (when the layer is one), then CSV and JSON.
+  let openMenu = null;
+  const closeMenu = () => { if (openMenu) { openMenu.remove(); openMenu = null; } };
+  function exportMenu(label) {
+    const wrap = el('span', { class: 'cl-menu-wrap' });
+    const btn = el('button', { type: 'button', text: label || 'Export', 'aria-haspopup': 'menu', 'aria-expanded': 'false', onclick: e => {
+      e.stopPropagation();
+      if (openMenu && openMenu.parentNode === wrap) { closeMenu(); btn.setAttribute('aria-expanded', 'false'); return; }
+      closeMenu();
+      const items = [];
+      const sheetUrl = cfg.layer && cfg.layer.url;
+      if (sheetUrl) items.push(el('a', { class: 'cl-menu-item', href: sheetUrl, target: '_blank', rel: 'noopener', onclick: closeMenu }, [el('b', { text: 'View in Google Sheets' }), el('small', { text: 'The layer itself. Share it from Drive.' })]));
+      items.push(
+        el('button', { class: 'cl-menu-item', type: 'button', onclick: () => { closeMenu(); download(`${API}.csv`, 'comments.csv', 'text/csv'); } }, [el('b', { text: 'Download CSV' }), el('small', { text: 'Every round, one row per note.' })]),
+        el('button', { class: 'cl-menu-item', type: 'button', onclick: () => { closeMenu(); download(API, 'comments.json', 'application/json'); } }, [el('b', { text: 'Download JSON' }), el('small', { text: 'For scripts and imports.' })])
+      );
+      openMenu = el('div', { class: 'cl-menu cl-ui', role: 'menu' }, items);
+      wrap.append(openMenu);
+      btn.setAttribute('aria-expanded', 'true');
     } });
+    wrap.append(btn);
+    return wrap;
   }
 
   function themeTab() {
@@ -478,7 +499,7 @@ function init(cfg) {
       });
     });
 
-    const foot = el('div', { class: 'cl-drawer-foot' }, [exportLink('Export CSV', `${API}.csv`, 'comments.csv', 'text/csv'), exportLink('Export JSON', API, 'comments.json', 'application/json')]);
+    const foot = el('div', { class: 'cl-drawer-foot' }, [exportMenu('Export')]);
     foot.append(el('button', { type: 'button', text: 'Rename round', onclick: async () => {
       if (!ensureAdmin()) return;
       const label = prompt('Rename this round', roundLabel(view));
@@ -527,6 +548,7 @@ function init(cfg) {
   }
 
   document.addEventListener('click', e => {
+    if (openMenu && !e.target.closest('.cl-menu-wrap')) closeMenu();
     if (!mode) return;
     if (e.target.closest('.cl-ui')) return;
     e.preventDefault();
@@ -535,7 +557,7 @@ function init(cfg) {
     if (!name) { renderBar(); return; }
     openNew(e);
   }, true);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closePop(); closeDrawer(); bar.classList.remove('is-open'); if (themeOpen) { themeOpen = false; renderBar(); } } });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeMenu(); closePop(); closeDrawer(); bar.classList.remove('is-open'); if (themeOpen) { themeOpen = false; renderBar(); } } });
   let raf = 0;
   const relayout = () => { if (!mode) return; cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { renderPins(); if (activePop) closePop(); }); };
   window.addEventListener('resize', relayout);
