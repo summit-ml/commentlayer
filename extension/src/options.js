@@ -99,29 +99,6 @@ $('join-link').addEventListener('click', async () => {
   await load();
 });
 
-$('create-sheet').addEventListener('click', async () => {
-  const name = $('sheet-name').value.trim() || 'My layer';
-  $('create-sheet').disabled = true;
-  const r = await send({ type: 'createSheet', name });
-  $('create-sheet').disabled = false;
-  if (r.error) { toast(r.error); return; }
-  $('sheet-name').value = '';
-  toast('Layer created. Share the sheet in Drive to invite people.');
-  await load();
-});
-
-$('open-sheet').addEventListener('click', async () => {
-  const link = $('open-link').value.trim();
-  if (!link) return;
-  $('open-sheet').disabled = true;
-  const r = await send({ type: 'openSheet', link, name: $('sheet-name').value.trim() });
-  $('open-sheet').disabled = false;
-  if (r.error) { toast(r.error); return; }
-  $('open-link').value = '';
-  toast('Layer added.');
-  await load();
-});
-
 $('add-backend').addEventListener('click', async () => {
   const api = $('backend-url').value.trim().replace(/\/$/, '');
   if (!/^https?:\/\//.test(api)) { toast('Enter the full API base URL.'); return; }
@@ -138,7 +115,5 @@ $('save').addEventListener('click', async () => {
   await send({ type: 'set', key: 'cl-admin', value: $('admin').value.trim() });
   toast('Saved');
 });
-
-$('sign-out').addEventListener('click', async () => { await send({ type: 'signOut' }); toast('Signed out. You will be asked to sign in again next time.'); });
 
 load();

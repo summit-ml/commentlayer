@@ -56,6 +56,7 @@ async function relay(res: Response) {
 
 // ── Google ───────────────────────────────────────────────────────────────────
 async function googleToken(interactive: boolean): Promise<string> {
+  if (!chrome.identity) throw new Error("Google Sheet layers aren't available in this version of the extension.");
   const r = await chrome.identity.getAuthToken({ interactive });
   const token = typeof r === "string" ? r : r?.token;
   if (!token) throw new Error("Google sign-in was cancelled.");
@@ -63,6 +64,7 @@ async function googleToken(interactive: boolean): Promise<string> {
 }
 
 async function forgetToken() {
+  if (!chrome.identity) return;
   try {
     const r = await chrome.identity.getAuthToken({ interactive: false });
     const token = typeof r === "string" ? r : r?.token;
@@ -124,7 +126,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
         }
         // The creator of a hosted layer is its admin without typing a token.
         if (layer && layer.type === "hosted" && layer.adminKey) s.values["cl-admin"] = layer.adminKey;
-        reply({ enabled: !!layer, api: layer ? (layer.type === "sheet" ? LOCAL_BASE : layer.api) : "", layer: layer ? { id: layer.id, name: layer.name, type: layer.type, url: layer.type === "sheet" ? layer.url : null, spreadsheetId: layer.type === "sheet" ? layer.spreadsheetId : null, api: layer.type === "sheet" ? null : layer.api, ttlDays: layer.type === "hosted" ? layer.ttlDays ?? 30 : null } : null, values: s.values });
+        reply({ enabled: !!layer, api: layer ? (layer.type === "sheet" ? LOCAL_BASE : layer.api) : "", layer: layer ? { id: layer.id, name: layer.name, type: layer.type, url: layer.type === "sheet" ? layer.url : null, spreadsheetId: layer.type === "sheet" ? layer.spreadsheetId : null, api: layer.type === "sheet" ? null : layer.api, ttlDays: layer.type === "hosted" ? layer.ttlDays ?? 30 : null, layerId: layer.type === "hosted" ? layer.layerId : null, key: layer.type === "hosted" ? layer.key : null } : null, values: s.values });
       } else if (msg.type === "set") {
         await chrome.storage.local.set({ [msg.key]: msg.value });
         if (msg.key === "cl-admin") stores.clear();

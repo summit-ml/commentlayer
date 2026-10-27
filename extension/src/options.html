@@ -67,19 +67,7 @@
   </div>
 
   <details>
-    <summary>Advanced: keep notes in a Google Sheet or on your own backend</summary>
-    <div class="card" style="margin-top:10px">
-      <b>Google Sheet</b>
-      <p class="hint" style="margin-top:2px">The spreadsheet lives in your Google Drive and never expires. Share it with teammates in Drive before inviting them.</p>
-      <div class="row">
-        <div><label for="sheet-name">Layer name</label><input id="sheet-name" placeholder="Website redesign"></div>
-        <button id="create-sheet">Create sheet</button>
-      </div>
-      <div class="row">
-        <div><label for="open-link">Or open a sheet someone shared with you</label><input id="open-link" placeholder="Paste the Google Sheets link"></div>
-        <button id="open-sheet">Open</button>
-      </div>
-    </div>
+    <summary>Advanced: keep notes on your own backend</summary>
     <div class="card" style="margin-top:10px">
       <b>Your own backend</b>
       <p class="hint" style="margin-top:2px">A CommentLayer backend you host yourself, such as the Cloudflare Worker, or a site with the embed.</p>
@@ -97,7 +85,7 @@
       <div><label for="name">Your name on comments</label><input id="name" placeholder="Shown next to your notes"></div>
       <div><label for="admin">Admin token</label><input id="admin" placeholder="Optional"></div>
     </div>
-    <p class="hint">The admin token lets you start and rename rounds and edit anyone's comments. You are the admin of every layer you create here. On a Google Sheet layer, set any token you like and share it with the people who should manage rounds.</p>
+    <p class="hint">The admin token lets you start and rename rounds and edit anyone's comments. You are the admin of every layer you create here. On your own backend, use the admin token that backend was configured with.</p>
     <label>Default colors</label>
     <div class="colors">
       <input id="primary" placeholder="Primary #hex">
@@ -105,7 +93,7 @@
       <input id="tertiary" placeholder="Text #hex">
     </div>
     <p class="hint">Blank means CommentLayer picks up the site's own brand variables, or its defaults. The Theme view in the panel overrides these per site.</p>
-    <div class="actions" style="justify-content:flex-start;margin-top:10px"><button class="primary" id="save">Save</button><button id="sign-out">Sign out of Google</button></div>
+    <div class="actions" style="justify-content:flex-start;margin-top:10px"><button class="primary" id="save">Save</button></div>
   </div>
 </div>
 <div id="toast"></div>

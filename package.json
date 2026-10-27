@@ -34,7 +34,8 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "typecheck": "tsc --noEmit && tsc --noEmit -p worker && tsc --noEmit -p extension",
-    "test": "node --experimental-strip-types --test test/*.test.mjs"
+    "test": "node --experimental-strip-types --test test/*.test.mjs",
+    "package": "node scripts/package.mjs"
   },
   "engines": {
     "node": ">=22"

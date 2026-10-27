@@ -570,6 +570,7 @@ function init(cfg) {
   const JOIN_URL = 'https://summitml.com/commentlayer/join';
   function inviteText() {
     const layer = cfg.layer;
+    if (layer && layer.type === 'hosted' && layer.layerId && layer.key) return { text: `${JOIN_URL}#layer=${encodeURIComponent(layer.layerId)}&key=${encodeURIComponent(layer.key)}&name=${encodeURIComponent(layer.name || 'Review layer')}`, note: 'Invite link copied. Anyone who opens it joins this layer and sees its comments.' };
     if (layer && layer.type === 'sheet' && layer.spreadsheetId) return { text: `${JOIN_URL}#sheet=${encodeURIComponent(layer.spreadsheetId)}&name=${encodeURIComponent(layer.name || 'Review layer')}`, note: 'Invite link copied. Share the sheet in Drive too, or they can\'t read it.' };
     if (layer && layer.type === 'backend' && layer.api) return { text: `${JOIN_URL}#api=${encodeURIComponent(layer.api)}&name=${encodeURIComponent(layer.name || 'Review layer')}`, note: 'Invite link copied.' };
     return { text: location.origin + location.pathname, note: 'Page link copied. Anyone who can open it can comment.' };
