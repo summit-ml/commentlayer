@@ -10,8 +10,7 @@ export type Layer =
   | { id: string; type: "backend"; name: string; api: string; sites: Record<string, true> };
 
 /** The Worker that keeps hosted layers (worker/). Mint a layer there and the invite link is all a teammate needs. */
-export const HOSTED_API = "https://commentlayer.summitml.com";
-export const JOIN_URL = "https://summitml.com/commentlayer/join";
+const HOSTED_API = "https://commentlayer.summitml.com";
 
 type Settings = { layers: Layer[]; activeLayer: string; values: Record<string, string | null> };
 
