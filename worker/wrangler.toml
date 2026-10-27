@@ -6,11 +6,14 @@
 #
 # Hosted layers live under /api/layers and /api/l/<id>; the browser extension talks to the
 # deployment at HOSTED_API in extension/src/background.ts. The single-tenant backend for the
-# embed is /api/commentlayer. To serve from your own hostname, add:
-#   routes = [{ pattern = "commentlayer.example.com", custom_domain = true }]
+# embed is /api/commentlayer. The route below gives the Worker its own hostname on a zone in
+# the same Cloudflare account (the deploy creates the DNS record); change or remove it for
+# your own deployment.
 name = "commentlayer"
 main = "src/index.ts"
+account_id = "5a0f2503e27ed2ff411b41b08bcc5174"
 compatibility_date = "2026-10-01"
+routes = [{ pattern = "commentlayer.summitml.com", custom_domain = true }]
 
 [assets]
 directory = "./public"
@@ -21,4 +24,4 @@ LAYER_TTL_DAYS = "30"
 
 [[kv_namespaces]]
 binding = "COMMENTS"
-id = "replace-with-your-namespace-id"
+id = "5c7c85d229464950a1e42a13f1b863f9"
