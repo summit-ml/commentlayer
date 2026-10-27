@@ -46,7 +46,7 @@
 <body>
 <div class="wrap">
   <div class="brand"><svg viewBox="0 0 64 64" width="22" height="22" aria-hidden="true"><rect x="8" y="28" width="48" height="28" rx="8" fill="#2a2529" stroke="#f0efeb" stroke-opacity=".4" stroke-width="4"/><rect x="8" y="10" width="48" height="28" rx="8" fill="#1f1c1f" stroke="#f0efeb" stroke-width="4"/><circle cx="44" cy="18" r="11" fill="#c94a8f"/></svg><span class="wordmark">comment<span>Layer</span></span><small id="version"></small></div>
-  <p class="lede">Drop a pin, leave a note, on any site. A layer is a place comments live; share it with the people who should see them.</p>
+  <p class="lede">Drop a pin, leave a note, on any site. A layer is a place comments live; send its invite link to the people who should see them.</p>
 
   <h2>Your layers</h2>
   <div id="layers"></div>
@@ -54,22 +54,35 @@
 
   <h2>Add a layer</h2>
   <div class="card">
-    <b>Google Sheet</b>
-    <p class="hint" style="margin-top:2px">Free. The spreadsheet lives in your Google Drive; share it with teammates and they can comment too.</p>
+    <b>New layer</b>
+    <p class="hint" style="margin-top:2px">One click, no sign-in. Anyone with the invite link can comment. Layers are kept 30 days after the last note; export any time.</p>
     <div class="row">
       <div><label for="new-name">Layer name</label><input id="new-name" placeholder="Website redesign"></div>
-      <button class="primary" id="create-sheet">Create sheet</button>
+      <button class="primary" id="create-layer">Create layer</button>
     </div>
     <div class="row">
-      <div><label for="open-link">Or open a sheet someone shared with you</label><input id="open-link" placeholder="Paste the Google Sheets link"></div>
-      <button id="open-sheet">Open</button>
+      <div><label for="invite-link">Have an invite link? Paste it here</label><input id="invite-link" placeholder="https://summitml.com/commentlayer/join#layer=…"></div>
+      <button id="join-link">Join</button>
     </div>
   </div>
 
   <details>
-    <summary>Advanced: connect a backend URL</summary>
+    <summary>Advanced: keep notes in a Google Sheet or on your own backend</summary>
     <div class="card" style="margin-top:10px">
-      <p class="hint" style="margin-top:0">For a CommentLayer backend you host yourself, such as the Cloudflare Worker, or a site with the embed.</p>
+      <b>Google Sheet</b>
+      <p class="hint" style="margin-top:2px">The spreadsheet lives in your Google Drive and never expires. Share it with teammates in Drive before inviting them.</p>
+      <div class="row">
+        <div><label for="sheet-name">Layer name</label><input id="sheet-name" placeholder="Website redesign"></div>
+        <button id="create-sheet">Create sheet</button>
+      </div>
+      <div class="row">
+        <div><label for="open-link">Or open a sheet someone shared with you</label><input id="open-link" placeholder="Paste the Google Sheets link"></div>
+        <button id="open-sheet">Open</button>
+      </div>
+    </div>
+    <div class="card" style="margin-top:10px">
+      <b>Your own backend</b>
+      <p class="hint" style="margin-top:2px">A CommentLayer backend you host yourself, such as the Cloudflare Worker, or a site with the embed.</p>
       <div class="row">
         <div><label for="backend-name">Layer name</label><input id="backend-name" placeholder="Staging"></div>
         <div><label for="backend-url">API base</label><input id="backend-url" placeholder="https://commentlayer.you.workers.dev/api/commentlayer"></div>
@@ -84,7 +97,7 @@
       <div><label for="name">Your name on comments</label><input id="name" placeholder="Shown next to your notes"></div>
       <div><label for="admin">Admin token</label><input id="admin" placeholder="Optional"></div>
     </div>
-    <p class="hint">The admin token lets you start and rename rounds and edit anyone's comments. On a Google Sheet layer, set any token you like and share it with the people who should manage rounds.</p>
+    <p class="hint">The admin token lets you start and rename rounds and edit anyone's comments. You are the admin of every layer you create here. On a Google Sheet layer, set any token you like and share it with the people who should manage rounds.</p>
     <label>Default colors</label>
     <div class="colors">
       <input id="primary" placeholder="Primary #hex">

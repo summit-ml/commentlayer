@@ -162,12 +162,13 @@ function init(cfg) {
   const when = iso => new Date(iso).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
   const pageLabel = p => p === '/' ? 'Home' : (p.replace(/^\//, '').split('/').filter(Boolean).map(s => s.replace(/-/g, ' ')).join(' / ') || 'Home').replace(/^\w/, c => c.toUpperCase());
   let toastTimer;
-  const toast = msg => {
+  const toast = (msg, action, ms = 2400) => {
     document.querySelectorAll('.cl-toast').forEach(t => t.remove());
     const t = el('div', { class: 'cl-toast cl-ui', text: msg });
+    if (action) t.append(el('a', { class: 'cl-toast-action', href: action.href, target: '_blank', rel: 'noopener', text: action.label }));
     document.body.append(t);
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => t.remove(), 2400);
+    toastTimer = setTimeout(() => t.remove(), ms);
   };
 
   const pathFor = node => {
@@ -618,9 +619,11 @@ function init(cfg) {
       comments = all.filter(c => c.page === page && c.version === view);
       renderBar();
       renderPins();
-    } catch {
+    } catch (err) {
       renderBar();
-      toast('Comments unavailable right now.');
+      const sheetUrl = cfg.layer && cfg.layer.url;
+      if (err && err.needsAccess && sheetUrl) toast("You don't have access to this layer's sheet yet.", { label: 'Request access', href: sheetUrl + '/edit' }, 10000);
+      else toast('Comments unavailable right now.');
     }
   }
 

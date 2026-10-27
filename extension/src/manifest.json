@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "CommentLayer",
   "version": "0.1.0",
-  "description": "Drop a pin, leave a note. Review comments on any website, stored in a Google Sheet you own.",
+  "description": "Drop a pin, leave a note. Private review comments on any website. One click to start, one link to invite.",
   "permissions": [
     "storage",
     "tabs",

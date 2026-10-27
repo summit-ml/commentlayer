@@ -1,7 +1,8 @@
 # Google setup for the extension
 
-The extension stores comments in a Google Sheet by default, using the reviewer's own Google
-account. For that it needs an OAuth client, which is a one-time, free setup for whoever
+Google Sheet layers are the extension's advanced option (the default is a hosted layer, which
+needs no sign-in). A sheet layer stores comments in a Google Sheet using the reviewer's own
+Google account. For that it needs an OAuth client, which is a one-time, free setup for whoever
 publishes the extension. End users never see any of this; they just see Google's sign-in.
 
 1. **Create a Google Cloud project** at console.cloud.google.com (any name).

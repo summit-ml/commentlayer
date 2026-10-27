@@ -14,7 +14,7 @@ window.CommentLayerConfig = chrome.runtime.sendMessage({ type: 'config', host: l
     },
     fetch: async (url, init) => {
       const r = await chrome.runtime.sendMessage({ type: 'fetch', host: location.host, url, init });
-      if (!r || r.error) throw new Error((r && r.error) || 'CommentLayer is not available.');
+      if (!r || r.error) throw Object.assign(new Error((r && r.error) || 'CommentLayer is not available.'), { needsAccess: !!(r && r.needsAccess) });
       return { status: r.status, ok: r.status >= 200 && r.status < 300, json: async () => r.body, text: async () => r.text };
     }
   };

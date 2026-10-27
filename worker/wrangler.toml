@@ -1,16 +1,23 @@
 # CommentLayer on Cloudflare Workers. Free tier is plenty for a review cycle.
 #
 #   npx wrangler kv namespace create COMMENTS     # paste the id below
-#   npx wrangler secret put ADMIN_TOKEN           # optional
+#   npx wrangler secret put ADMIN_TOKEN           # optional, single-tenant backend only
 #   npx wrangler deploy
 #
-# Then point the overlay or the browser extension at https://<name>.<you>.workers.dev
+# Hosted layers live under /api/layers and /api/l/<id>; the browser extension talks to the
+# deployment at HOSTED_API in extension/src/background.ts. The single-tenant backend for the
+# embed is /api/commentlayer. To serve from your own hostname, add:
+#   routes = [{ pattern = "commentlayer.example.com", custom_domain = true }]
 name = "commentlayer"
 main = "src/index.ts"
 compatibility_date = "2026-10-01"
 
 [assets]
 directory = "./public"
+
+[vars]
+# A hosted layer is deleted this many days after its last note.
+LAYER_TTL_DAYS = "30"
 
 [[kv_namespaces]]
 binding = "COMMENTS"

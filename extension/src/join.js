@@ -4,6 +4,8 @@ window.addEventListener('message', async e => {
   if (e.source !== window || !e.data || e.data.source !== 'commentlayer-page' || e.data.type !== 'join') return;
   window.postMessage({ source: 'commentlayer', type: 'present' }, '*');
   let r;
-  try { r = await chrome.runtime.sendMessage(e.data.api ? { type: 'addBackend', api: e.data.api, name: e.data.name } : { type: 'openSheet', link: e.data.sheetId, name: e.data.name }); } catch (err) { r = { error: err.message }; }
-  window.postMessage({ source: 'commentlayer', type: 'joined', ok: !!(r && r.ok), error: (r && r.error) || 'Could not join.', layer: r && r.layer ? { name: r.layer.name } : null }, '*');
+  const d = e.data;
+  const msg = d.layerId ? { type: 'joinHosted', layerId: d.layerId, key: d.key, name: d.name } : d.api ? { type: 'addBackend', api: d.api, name: d.name } : { type: 'openSheet', link: d.sheetId, name: d.name };
+  try { r = await chrome.runtime.sendMessage(msg); } catch (err) { r = { error: err.message }; }
+  window.postMessage({ source: 'commentlayer', type: 'joined', ok: !!(r && r.ok), error: (r && r.error) || 'Could not join.', needsAccess: !!(r && r.needsAccess), layer: r && r.layer ? { name: r.layer.name } : null }, '*');
 });

@@ -1,12 +1,17 @@
-// CommentLayer extension service worker. Holds the layers a reviewer belongs to, talks to
-// Google Sheets or a backend on behalf of the content script, and runs the comment store
-// in-process for sheet layers so no server is involved.
+// CommentLayer extension service worker. Holds the layers a reviewer belongs to and talks to
+// the hosted Worker, a self-hosted backend, or Google Sheets on behalf of the content script.
+// Sheet layers run the comment store in-process so no server is involved.
 import { createCommentStore, createHandler, type CommentStore } from "../../src/core";
 import { createLayerSpreadsheet, parseSpreadsheetId, sheetsPersistence, SheetsError } from "../../src/sheets";
 
 export type Layer =
+  | { id: string; type: "hosted"; name: string; layerId: string; key: string; adminKey?: string; api: string; ttlDays?: number; sites: Record<string, true> }
   | { id: string; type: "sheet"; name: string; spreadsheetId: string; url: string; sites: Record<string, true> }
   | { id: string; type: "backend"; name: string; api: string; sites: Record<string, true> };
+
+/** The Worker that keeps hosted layers (worker/). Mint a layer there and the invite link is all a teammate needs. */
+export const HOSTED_API = "https://commentlayer.summitml.com";
+export const JOIN_URL = "https://summitml.com/commentlayer/join";
 
 type Settings = { layers: Layer[]; activeLayer: string; values: Record<string, string | null> };
 
@@ -31,6 +36,24 @@ async function settings(): Promise<Settings> {
 }
 
 const layerForHost = (s: Settings, host: string) => s.layers.find((l) => l.sites[host]) ?? null;
+const newId = () => "l-" + crypto.randomUUID().slice(0, 8);
+
+// ── hosted layers ────────────────────────────────────────────────────────────
+type HostedInfo = { id: string; name: string; key: string; adminKey: string; ttlDays: number };
+
+async function hosted(path: string, init: RequestInit = {}, key?: string) {
+  const res = await fetch(HOSTED_API + path, { ...init, headers: { "Content-Type": "application/json", ...(key ? { "X-Layer-Key": key } : {}), ...((init.headers as Record<string, string>) || {}) } });
+  const body = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+  if (!res.ok) throw new Error(typeof body.error === "string" ? body.error : `The layer service answered ${res.status}.`);
+  return body;
+}
+
+async function relay(res: Response) {
+  const type = res.headers.get("content-type") || "";
+  if (res.status === 204) return { status: 204, body: null, text: "" };
+  if (type.includes("text/csv")) return { status: res.status, body: null, text: await res.text() };
+  return { status: res.status, body: await res.json().catch(() => ({})), text: "" };
+}
 
 // ── Google ───────────────────────────────────────────────────────────────────
 async function googleToken(interactive: boolean): Promise<string> {
@@ -100,7 +123,9 @@ chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
             await chrome.storage.local.set({ "cl-name": name });
           }
         }
-        reply({ enabled: !!layer, api: layer ? (layer.type === "backend" ? layer.api : LOCAL_BASE) : "", layer: layer ? { id: layer.id, name: layer.name, type: layer.type, url: layer.type === 'sheet' ? layer.url : null, spreadsheetId: layer.type === 'sheet' ? layer.spreadsheetId : null, api: layer.type === 'backend' ? layer.api : null } : null, values: s.values });
+        // The creator of a hosted layer is its admin without typing a token.
+        if (layer && layer.type === "hosted" && layer.adminKey) s.values["cl-admin"] = layer.adminKey;
+        reply({ enabled: !!layer, api: layer ? (layer.type === "sheet" ? LOCAL_BASE : layer.api) : "", layer: layer ? { id: layer.id, name: layer.name, type: layer.type, url: layer.type === "sheet" ? layer.url : null, spreadsheetId: layer.type === "sheet" ? layer.spreadsheetId : null, api: layer.type === "sheet" ? null : layer.api, ttlDays: layer.type === "hosted" ? layer.ttlDays ?? 30 : null } : null, values: s.values });
       } else if (msg.type === "set") {
         await chrome.storage.local.set({ [msg.key]: msg.value });
         if (msg.key === "cl-admin") stores.clear();
@@ -112,10 +137,11 @@ chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
           reply({ status: 404, body: { error: "No layer for this site." }, text: "" });
         } else if (layer.type === "sheet") {
           reply(await handleLocally(layer, msg.url, msg.init));
+        } else if (layer.type === "hosted") {
+          const init: RequestInit = { ...msg.init, headers: { ...((msg.init && msg.init.headers) || {}), "X-Layer-Key": layer.key } };
+          reply(await relay(await fetch(msg.url, init)));
         } else {
-          const res = await fetch(msg.url, msg.init);
-          const type = res.headers.get("content-type") || "";
-          reply({ status: res.status, body: res.status === 204 || type.includes("text/csv") ? null : await res.json().catch(() => ({})), text: type.includes("text/csv") ? await res.text() : "" });
+          reply(await relay(await fetch(msg.url, msg.init)));
         }
       } else if (msg.type === "layers") {
         const s = await settings();
@@ -132,11 +158,42 @@ chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
       } else if (msg.type === "signOut") {
         await forgetToken();
         reply({ ok: true });
+      } else if (msg.type === "createHosted") {
+        const info = (await hosted("/api/layers", { method: "POST", body: JSON.stringify({ name: msg.name || "Shared layer" }) })) as unknown as HostedInfo;
+        const s = await settings();
+        const layer: Layer = { id: newId(), type: "hosted", name: info.name, layerId: info.id, key: info.key, adminKey: info.adminKey, api: `${HOSTED_API}/api/l/${info.id}`, ttlDays: info.ttlDays, sites: {} };
+        await chrome.storage.local.set({ layers: [...s.layers, layer], activeLayer: layer.id });
+        reply({ ok: true, layer });
+      } else if (msg.type === "joinHosted") {
+        const layerId = String(msg.layerId || "");
+        const key = String(msg.key || "");
+        if (!/^[A-Za-z0-9_-]{6,40}$/.test(layerId) || !key) throw new Error("That invite link doesn't look right.");
+        const s = await settings();
+        const existing = s.layers.find((l) => l.type === "hosted" && l.layerId === layerId);
+        if (existing) {
+          reply({ ok: true, layer: existing });
+        } else {
+          const info = (await hosted(`/api/layers/${layerId}`, {}, key)) as unknown as HostedInfo;
+          const layer: Layer = { id: newId(), type: "hosted", name: msg.name || info.name || "Shared layer", layerId, key, api: `${HOSTED_API}/api/l/${layerId}`, ttlDays: info.ttlDays, sites: {} };
+          await chrome.storage.local.set({ layers: [...s.layers, layer], activeLayer: layer.id });
+          reply({ ok: true, layer });
+        }
+      } else if (msg.type === "deleteHosted") {
+        const s = await settings();
+        const layer = s.layers.find((l) => l.id === msg.id);
+        if (!layer || layer.type !== "hosted" || !layer.adminKey) throw new Error("Only the person who created the layer can delete it.");
+        await hosted(`/api/layers/${layer.layerId}`, { method: "DELETE", headers: { "X-Comment-Admin": layer.adminKey } }).catch((err: Error) => {
+          if (!/expired|exist/i.test(err.message)) throw err;
+        });
+        const layers = s.layers.filter((l) => l.id !== layer.id);
+        await chrome.storage.local.set({ layers, activeLayer: s.activeLayer === layer.id ? layers[0]?.id ?? "" : s.activeLayer });
+        stores.delete(layer.id);
+        reply({ ok: true });
       } else if (msg.type === "createSheet") {
         await googleToken(true);
         const created = await createLayerSpreadsheet(`CommentLayer · ${msg.name}`, () => googleToken(false));
         const s = await settings();
-        const layer: Layer = { id: "l-" + crypto.randomUUID().slice(0, 8), type: "sheet", name: msg.name, spreadsheetId: created.spreadsheetId, url: created.url, sites: {} };
+        const layer: Layer = { id: newId(), type: "sheet", name: msg.name, spreadsheetId: created.spreadsheetId, url: created.url, sites: {} };
         await chrome.storage.local.set({ layers: [...s.layers, layer], activeLayer: layer.id });
         reply({ ok: true, layer });
       } else if (msg.type === "addBackend") {
@@ -147,7 +204,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
         if (existing) {
           reply({ ok: true, layer: existing });
         } else {
-          const layer: Layer = { id: "l-" + crypto.randomUUID().slice(0, 8), type: "backend", name: msg.name || "Shared layer", api, sites: {} };
+          const layer: Layer = { id: newId(), type: "backend", name: msg.name || "Shared layer", api, sites: {} };
           await chrome.storage.local.set({ layers: [...s.layers, layer], activeLayer: layer.id });
           reply({ ok: true, layer });
         }
@@ -159,12 +216,17 @@ chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
         await sheetStore(probe, true);
         stores.delete("probe");
         const s = await settings();
-        const layer: Layer = { ...probe, id: "l-" + crypto.randomUUID().slice(0, 8), name: msg.name || "Shared layer" };
+        const layer: Layer = { ...probe, id: newId(), name: msg.name || "Shared layer" };
         await chrome.storage.local.set({ layers: [...s.layers, layer], activeLayer: layer.id });
         reply({ ok: true, layer });
       }
     } catch (err) {
       if (err instanceof SheetsError && err.status === 401) await forgetToken();
+      // 403 from Sheets means the signed-in account isn't on the sheet; callers offer Google's access request.
+      if (err instanceof SheetsError && err.status === 403) {
+        reply({ error: "Your Google account doesn't have access to this layer's sheet yet.", needsAccess: true });
+        return;
+      }
       reply({ error: err instanceof Error ? err.message : String(err) });
     }
   })();

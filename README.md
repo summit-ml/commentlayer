@@ -2,8 +2,8 @@
 
 # CommentLayer
 
-Drop a pin, leave a note. Private review comments on any website, stored wherever you choose:
-only the people you share with see them, and nothing is ever posted publicly. MIT licensed. Built by [Summit ML](https://summitml.com/products/open-source).
+Drop a pin, leave a note. Private review comments on any website: only the people with your
+invite link see them, and nothing is ever posted publicly. MIT licensed. Built by [Summit ML](https://summitml.com/products/open-source).
 
 ```sh
 git clone https://github.com/summit-ml/commentlayer
@@ -51,21 +51,31 @@ runs on the free tier, serves the overlay files too so you can embed from anywhe
 `npm run build` writes `extension/dist`. In Chrome: Extensions → Developer mode → Load unpacked →
 pick that folder. Then open the extension's options.
 
-**Google Sheet layers.** Click "Create sheet", sign in with Google, and you have a layer: a
-spreadsheet in your own Drive with a `comments` tab and a `rounds` tab. Click the toolbar icon on
-any site to turn the layer on there, then drop pins. To invite teammates, share the sheet with
-them in Drive, then click "Copy invite" and send the link. It opens a join page at
-`summitml.com/commentlayer/join`: with the extension installed, the layer is added on the spot;
-without it, the page says how to install and then finishes the join when they come back.
-Access control is Google's sharing: whoever can edit the sheet can comment.
+**Hosted layers.** Type a name, click "Create layer", done: no sign-in, no setup. Click the
+toolbar icon on any site to turn the layer on there, then drop pins. To invite teammates, click
+"Copy invite" and send the link. It opens a join page at `summitml.com/commentlayer/join`: with
+the extension installed, the layer is added on the spot; without it, the page says how to
+install and then finishes the join when they come back. Access control is the link itself, the
+same way a shared Figma or Loom link works. The creator is the layer's admin (rounds, moderation,
+deletion) without typing a token.
 
-There is no server. The comment store runs inside the extension and talks to the Sheets API
-with the reviewer's own token. See [docs/google-setup.md](docs/google-setup.md) for the
-one-time OAuth client setup the publisher does.
+Hosted layers live on the Worker in `worker/` (Summit ML runs it at `HOSTED_API`, set in
+`extension/src/background.ts`). Each layer is one KV value, written with a sliding TTL: a layer
+is deleted 30 days after its last note. Export CSV or JSON from the overlay any time, or delete
+the layer early from the options page.
 
-**Backend layers (advanced).** Under "Advanced: connect a backend URL", paste the API base of a
-CommentLayer backend you host, such as the Worker, or a site with the embed. Requests go through
-the extension's service worker, so the backend doesn't need CORS.
+**Google Sheet layers (advanced).** Under "Advanced", "Create sheet" signs in with Google and
+makes a spreadsheet in your own Drive with a `comments` tab and a `rounds` tab; it never
+expires and the data stays in your Drive. Share the sheet with teammates as Editor before
+sending the invite; someone who opens an invite before being shared gets a "Request layer
+access" button that goes through Google's own access request. The comment store runs inside
+the extension and talks to the Sheets API with the reviewer's own token; see
+[docs/google-setup.md](docs/google-setup.md) for the one-time OAuth client setup the publisher
+does.
+
+**Your own backend (advanced).** Also under "Advanced", paste the API base of a CommentLayer
+backend you host, such as the Worker's `/api/commentlayer`, or a site with the embed. Requests
+go through the extension's service worker, so the backend doesn't need CORS.
 
 A reviewer can belong to several layers. The toolbar icon turns the *active* layer on for the
 current site; the options page shows which sites each layer is on. Pages are keyed by host and
@@ -113,13 +123,16 @@ the extension's service worker is bundled (esbuild).
 - `src/core.ts`: `createCommentStore({ persistence, adminToken })`, `createHandler(getStore,
   { base, cors })`, `memoryPersistence()`, `sha256()`. No Node imports; runs anywhere.
 - `src/index.ts`: the Node entry. Re-exports core and adds `filePersistence(dir)` and `CLIENT_DIR`.
-- `worker/`: Cloudflare Worker with `kvPersistence`.
+- `worker/`: Cloudflare Worker. Hosted layers (`/api/layers`, `/api/l/<id>/…`, one KV value
+  per layer with a sliding TTL) plus the single-tenant `/api/commentlayer` backend.
 - `src/sheets.ts`: `sheetsPersistence({ spreadsheetId, token })` and `createLayerSpreadsheet()`,
   the Google Sheets adapter the extension uses. Runs anywhere `fetch` does.
 - `extension/src/`: Manifest V3 extension. `background.ts` (bundled by the build) holds the
-  layers, signs in with Google, and runs the core store in-process for sheet layers; `bridge.js`
-  hands the overlay its config and a fetch that goes through the service worker.
-- `test/`: `pnpm test` runs the core through the handler with the Node test runner.
+  layers, talks to the hosted Worker, signs in with Google for sheet layers and runs the core
+  store in-process for those; `bridge.js` hands the overlay its config and a fetch that goes
+  through the service worker.
+- `test/`: `npm test` runs the core through the handler, the Sheets adapter, and the Worker's
+  hosted-layer routes with the Node test runner.
 
 ## Host configuration
 
