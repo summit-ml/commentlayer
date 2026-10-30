@@ -178,6 +178,16 @@ function init(cfg) {
     const index = Array.from(parent.children).filter(c => c.tagName === node.tagName).indexOf(node) + 1;
     return pathFor(parent) + '>' + node.tagName.toLowerCase() + ':nth-of-type(' + index + ')';
   };
+  // A short, human-readable hint of what was clicked: its label if it has one, else the first bit of text.
+  const snippetFor = node => {
+    const label = node.getAttribute('aria-label') || node.getAttribute('alt') || node.getAttribute('title') || (node.tagName === 'INPUT' && node.placeholder) || '';
+    let text = label.trim();
+    if (!text) {
+      const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+      let n; while (!text && (n = walker.nextNode())) text = n.nodeValue.replace(/\s+/g, ' ').trim();
+    }
+    return text.length > 120 ? text.slice(0, 117) + '…' : text;
+  };
   const anchorFor = target => {
     let node = target instanceof Element ? target : target.parentElement;
     while (node && (node.namespaceURI === 'http://www.w3.org/2000/svg' || node.classList.contains('cl-ui'))) node = node.parentElement;
@@ -312,7 +322,7 @@ function init(cfg) {
   }
   // One Export button that opens a small menu: the sheet (when the layer is one), then CSV and JSON.
   let openMenu = null;
-  const closeMenu = () => { if (openMenu) { openMenu.remove(); openMenu = null; } };
+  const closeMenu = () => { if (openMenu) { const b = openMenu.parentNode && openMenu.parentNode.querySelector('[aria-expanded]'); if (b) b.setAttribute('aria-expanded', 'false'); openMenu.remove(); openMenu = null; } };
   function exportMenu(label) {
     const wrap = el('span', { class: 'cl-menu-wrap' });
     const btn = el('button', { type: 'button', text: label || 'Export', 'aria-haspopup': 'menu', 'aria-expanded': 'false', onclick: e => {
@@ -324,7 +334,8 @@ function init(cfg) {
       if (sheetUrl) items.push(el('a', { class: 'cl-menu-item', href: sheetUrl, target: '_blank', rel: 'noopener', onclick: closeMenu }, [el('b', { text: 'View in Google Sheets' }), el('small', { text: 'The layer itself. Share it from Drive.' })]));
       items.push(
         el('button', { class: 'cl-menu-item', type: 'button', onclick: () => { closeMenu(); download(`${API}.csv`, 'comments.csv', 'text/csv'); } }, [el('b', { text: 'Download CSV' }), el('small', { text: 'Every round, one row per note.' })]),
-        el('button', { class: 'cl-menu-item', type: 'button', onclick: () => { closeMenu(); download(API, 'comments.json', 'application/json'); } }, [el('b', { text: 'Download JSON' }), el('small', { text: 'For scripts and imports.' })])
+        el('button', { class: 'cl-menu-item', type: 'button', onclick: () => { closeMenu(); download(API, 'comments.json', 'application/json'); } }, [el('b', { text: 'Download JSON' }), el('small', { text: 'For scripts and imports.' })]),
+        el('button', { class: 'cl-menu-item', type: 'button', onclick: () => { closeMenu(); copyDigest(); } }, [el('b', { text: 'Copy for AI' }), el('small', { text: 'This round as text, ready to paste into an assistant or a ticket.' })])
       );
       openMenu = el('div', { class: 'cl-menu cl-ui', role: 'menu' }, items);
       wrap.append(openMenu);
@@ -332,6 +343,35 @@ function init(cfg) {
     } });
     wrap.append(btn);
     return wrap;
+  }
+
+  // A markdown digest of the round being viewed: one entry per note with the page, the element, and where on it the pin sits.
+  function digest() {
+    const list = all.filter(c => c.version === view);
+    const pages = [...new Set(list.map(c => c.page))];
+    const pct = v => Math.round(v * 100) + '%';
+    const lines = [
+      '# Review comments · ' + roundLabel(view),
+      `${list.length} note${list.length === 1 ? '' : 's'} on ${pages.length} page${pages.length === 1 ? '' : 's'}, exported ${new Date().toISOString().slice(0, 10)}.`,
+      'Each note names the page, the element that was clicked, and the point inside it (x% across, y% down). Open the page, find the element with the selector, and the pin is at that point.',
+      ''
+    ];
+    pages.forEach(p => {
+      lines.push('## ' + p, '');
+      list.filter(c => c.page === p).forEach((c, i) => {
+        const what = (c.tag ? '<' + c.tag + '>' : 'element') + (c.snippet ? ' "' + c.snippet + '"' : '');
+        const votes = c.votes || {};
+        const meta = [c.author, when(c.createdAt), c.resolved ? 'resolved' : 'open'];
+        if (votes.up) meta.push(votes.up + ' up'); if (votes.down) meta.push(votes.down + ' down');
+        lines.push(`${i + 1}. **${what}** · ${meta.join(' · ')}`, `   > ${c.text.replace(/\n/g, '\n   > ')}`, `   selector: \`${c.selector}\` · at ${pct(c.x)}, ${pct(c.y)}` + (c.vw && c.vh ? ` · viewport ${c.vw}×${c.vh}` : ''), '');
+      });
+    });
+    return lines.join('\n');
+  }
+  async function copyDigest() {
+    await refresh();
+    const text = digest();
+    try { await navigator.clipboard.writeText(text); toast('Copied. Paste it into an assistant, a ticket, or a doc.'); } catch { prompt('Copy this text', text); }
   }
 
   // Votes: an up and a down arrow with counts. One vote per person, anonymous to everyone else.
@@ -458,7 +498,8 @@ function init(cfg) {
     const draft = {
       page, selector: pathFor(anchor),
       x: r.width ? (e.clientX - r.left) / r.width : 0, y: r.height ? (e.clientY - r.top) / r.height : 0,
-      px: e.pageX, py: e.pageY, author: name
+      px: e.pageX, py: e.pageY, author: name,
+      tag: anchor.tagName.toLowerCase(), snippet: snippetFor(anchor), vw: window.innerWidth, vh: window.innerHeight
     };
     const pin = el('button', { class: 'cl-pin cl-draft', type: 'button', text: '+' });
     pin.style.left = e.pageX + 'px'; pin.style.top = e.pageY + 'px';
@@ -500,9 +541,24 @@ function init(cfg) {
       ])
     ]);
 
-    const rounds = el('div', { class: 'cl-rounds', role: 'tablist', 'aria-label': 'Review rounds' });
-    versions.forEach(v => rounds.append(el('button', { type: 'button', role: 'tab', class: v.id === view ? 'cl-round-active' : '', 'aria-selected': String(v.id === view), title: v.id === currentVersion ? 'Current round' : 'Started ' + when(v.createdAt), onclick: () => { setView(v.id); openDrawer(); } }, [v.label + ' ', el('span', { class: 'cl-count', text: String(v.count) })])));
-    rounds.append(el('button', { type: 'button', class: 'cl-round-new', text: '+ New round', title: admin ? 'Start a new review round' : 'Needs the admin token', onclick: async () => {
+    const rounds = el('div', { class: 'cl-rounds' });
+    const pick = el('span', { class: 'cl-menu-wrap' });
+    const chev = el('span', { class: 'cl-chev', 'aria-hidden': 'true' });
+    chev.innerHTML = ARROW.down;
+    const pickBtn = el('button', { type: 'button', class: 'cl-round-pick', 'aria-haspopup': 'menu', 'aria-expanded': 'false', title: versions.length > 1 ? 'Switch round' : 'The only round so far', onclick: e => {
+      e.stopPropagation();
+      if (openMenu && openMenu.parentNode === pick) { closeMenu(); pickBtn.setAttribute('aria-expanded', 'false'); return; }
+      closeMenu();
+      openMenu = el('div', { class: 'cl-menu cl-menu-rounds cl-ui', role: 'menu', 'aria-label': 'Review rounds' }, versions.slice().reverse().map(v =>
+        el('button', { class: 'cl-menu-item' + (v.id === view ? ' is-active' : ''), type: 'button', role: 'menuitemradio', 'aria-checked': String(v.id === view), onclick: () => { closeMenu(); setView(v.id); openDrawer(); } }, [
+          el('b', {}, [v.label + ' ', el('span', { class: 'cl-count', text: String(v.count) })]),
+          el('small', { text: v.id === currentVersion ? 'Current round' : 'Started ' + when(v.createdAt) })
+        ])));
+      pick.append(openMenu);
+      pickBtn.setAttribute('aria-expanded', 'true');
+    } }, [el('span', { class: 'cl-round-pick-label', text: roundLabel(view) }), el('span', { class: 'cl-count', text: String(shown.length) }), chev]);
+    pick.append(pickBtn);
+    rounds.append(pick, el('button', { type: 'button', class: 'cl-round-new', text: '+ New round', title: admin ? 'Start a new review round' : 'Needs the admin token', onclick: async () => {
       if (!ensureAdmin()) return;
       const label = prompt('Name for the new review round', `Round ${versions.length + 1}`);
       if (label === null) return;

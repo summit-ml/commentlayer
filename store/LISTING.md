@@ -29,7 +29,7 @@ What you get
 • Pins anchored to the element, not the pixel, so they stay put when the layout changes
 • Review rounds, so each pass of feedback stays separate
 • Resolve, vote, edit, and delete notes
-• Export everything as CSV or JSON
+• Export everything as CSV or JSON, or copy a round as text to paste into an AI assistant or a ticket
 • Works on any site, including staging and localhost
 • Themes itself to the site's brand colors
 

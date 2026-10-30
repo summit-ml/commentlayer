@@ -11,6 +11,11 @@ export type Comment = {
   y: number;
   px: number | null;
   py: number | null;
+  /** What was clicked: its tag, a short text snippet, and the viewport size at the time. */
+  tag?: string | null;
+  snippet?: string | null;
+  vw?: number | null;
+  vh?: number | null;
   author: string;
   text: string;
   createdAt: string;
@@ -111,6 +116,10 @@ export async function createCommentStore({ persistence, adminToken = "" }: Store
     y: c.y,
     px: c.px,
     py: c.py,
+    tag: c.tag ?? null,
+    snippet: c.snippet ?? null,
+    vw: c.vw ?? null,
+    vh: c.vh ?? null,
     author: c.author,
     text: c.text,
     createdAt: c.createdAt,
@@ -131,8 +140,8 @@ export async function createCommentStore({ persistence, adminToken = "" }: Store
     },
     csv() {
       const label = (id: string) => versions.find((v) => v.id === id)?.label ?? id;
-      const rows: unknown[][] = [["id", "round", "page", "author", "createdAt", "updatedAt", "resolved", "text"]];
-      comments.forEach((c) => rows.push([c.id, label(c.version), c.page, c.author, c.createdAt, c.updatedAt ?? "", c.resolved ? "yes" : "no", c.text]));
+      const rows: unknown[][] = [["id", "round", "page", "author", "createdAt", "updatedAt", "resolved", "text", "element", "snippet", "selector", "x", "y", "viewport"]];
+      comments.forEach((c) => rows.push([c.id, label(c.version), c.page, c.author, c.createdAt, c.updatedAt ?? "", c.resolved ? "yes" : "no", c.text, c.tag ?? "", c.snippet ?? "", c.selector, c.x, c.y, c.vw && c.vh ? `${c.vw}x${c.vh}` : ""]));
       return rows.map((r) => r.map(csvCell).join(",")).join("\r\n");
     },
     versions() {
@@ -168,7 +177,7 @@ export async function createCommentStore({ persistence, adminToken = "" }: Store
       const y = num(body.y);
       if (!tokenHash || !page || !selector || !author || !text || x === null || y === null) return { error: "Missing or invalid fields.", status: 400 } as StoreError;
       const now = new Date().toISOString();
-      const c: Comment = { id: crypto.randomUUID(), page, selector, x, y, px: num(body.px), py: num(body.py), author, text, createdAt: now, updatedAt: null, resolved: false, version: current().id, owner: tokenHash };
+      const c: Comment = { id: crypto.randomUUID(), page, selector, x, y, px: num(body.px), py: num(body.py), tag: str(body.tag, 40), snippet: str(body.snippet, 160), vw: num(body.vw), vh: num(body.vh), author, text, createdAt: now, updatedAt: null, resolved: false, version: current().id, owner: tokenHash };
       comments.push(c);
       await save();
       return pub(c, tokenHash);

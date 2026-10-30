@@ -64,6 +64,12 @@ Hosted layers live on the Worker in `worker/` (Summit ML runs it at `HOSTED_API`
 is deleted 30 days after its last note. Export CSV or JSON from the overlay any time, or delete
 the layer early from the options page.
 
+Every note records where it was left: the page, a CSS path to the clicked element, the point
+inside that element as fractions of its width and height, the element's tag and a short text
+snippet, and the viewport size at the time. All of it is in the JSON and CSV exports. "Copy for
+AI" in the Export menu writes the current round as markdown with those details per note, so an
+assistant (or a ticket) can find each pin without a screenshot.
+
 **Google Sheet layers (advanced).** Under "Advanced", "Create sheet" signs in with Google and
 makes a spreadsheet in your own Drive with a `comments` tab and a `rounds` tab; it never
 expires and the data stays in your Drive. Share the sheet with teammates as Editor before

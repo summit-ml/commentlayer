@@ -73,3 +73,17 @@ test("votes are one per person, exclusive, and come back as counts only", async 
   assert.equal(asCarol[0].myVote, null);
   assert.equal("reactions" in asCarol[0], false);
 });
+
+test("keeps what was clicked: tag, snippet and viewport, in the api and the csv", async () => {
+  const handle = await boot();
+  const body = { page: "/", selector: "main>h1:nth-of-type(1)", x: 0.25, y: 0.5, px: 300, py: 120, tag: "h1", snippet: "Modern, AI-first engineering", vw: 1440, vh: 900, author: "Ann", text: "Shorter" };
+  const created = await (await call(handle, "POST", "/comments", { body, token: "ann" })).json();
+  assert.equal(created.tag, "h1");
+  assert.equal(created.snippet, "Modern, AI-first engineering");
+  assert.equal(created.vw, 1440);
+  const bare = await (await call(handle, "POST", "/comments", { body: { page: "/", selector: "p", x: 0, y: 0, author: "Bob", text: "Old client" }, token: "bob" })).json();
+  assert.equal(bare.tag, null);
+  const csv = await (await call(handle, "GET", "/comments.csv")).text();
+  assert.match(csv, /"text","element","snippet","selector","x","y","viewport"/);
+  assert.match(csv, /"Shorter","h1","Modern, AI-first engineering","main>h1:nth-of-type\(1\)","0.25","0.5","1440x900"/);
+});

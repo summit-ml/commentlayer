@@ -138,12 +138,18 @@ body:has(> .cl-layer.cl-on) .cl-ui button, body:has(> .cl-layer.cl-on) .cl-ui a,
 .cl-drawer h2 .cl-count { font-weight: 500; }
 .cl-drawer .cl-close { flex: none; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 50%; background: var(--cl-surface-soft); color: var(--cl-fg-soft); font: 400 18px/30px var(--cl-font); cursor: pointer; transition: color 140ms, background 140ms; }
 .cl-drawer .cl-close:hover { color: var(--cl-fg); background: var(--cl-surface-line); }
-.cl-drawer .cl-rounds { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 18px 14px; }
-.cl-drawer .cl-rounds button { font: 500 12px/1 var(--cl-font); border: 1px solid var(--cl-surface-line); border-radius: 999px; padding: 6px 10px; background: transparent; color: var(--cl-fg-soft); cursor: pointer; transition: color 140ms, background 140ms, border-color 140ms; }
-.cl-drawer .cl-rounds button .cl-count { margin-left: 2px; }
-.cl-drawer .cl-rounds button:hover { color: var(--cl-fg); border-color: var(--cl-fg-soft); }
-.cl-drawer .cl-rounds button.cl-round-active { color: var(--cl-fg); background: var(--cl-surface-soft); border-color: transparent; }
-.cl-drawer .cl-rounds button.cl-round-new { color: var(--cl-accent); border-style: dashed; }
+.cl-drawer .cl-rounds { display: flex; align-items: center; gap: 6px; padding: 0 18px 14px; }
+.cl-drawer .cl-rounds > button, .cl-drawer .cl-rounds .cl-round-pick { font: 500 12px/1 var(--cl-font); border: 1px solid var(--cl-surface-line); border-radius: 999px; padding: 6px 10px; background: transparent; color: var(--cl-fg-soft); cursor: pointer; transition: color 140ms, background 140ms, border-color 140ms; }
+.cl-drawer .cl-rounds .cl-round-pick { display: inline-flex; align-items: center; gap: 5px; max-width: 220px; color: var(--cl-fg); background: var(--cl-surface-soft); border-color: transparent; }
+.cl-drawer .cl-rounds .cl-round-pick-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cl-drawer .cl-rounds .cl-round-pick .cl-chev { display: inline-flex; color: var(--cl-fg-soft); transition: transform 160ms; }
+.cl-drawer .cl-rounds .cl-round-pick[aria-expanded="true"] .cl-chev { transform: rotate(180deg); }
+.cl-drawer .cl-rounds .cl-round-pick:hover, .cl-drawer .cl-rounds .cl-round-pick[aria-expanded="true"] { border-color: var(--cl-fg-soft); }
+.cl-drawer .cl-rounds .cl-round-new { color: var(--cl-accent); border-style: dashed; }
+.cl-drawer .cl-rounds .cl-round-new:hover { color: var(--cl-fg); border-color: var(--cl-fg-soft); }
+.cl-menu.cl-menu-rounds { top: calc(100% + 6px); bottom: auto; left: 0; right: auto; min-width: 230px; max-height: min(50vh, 420px); overflow-y: auto; }
+.cl-menu.cl-menu-rounds .cl-menu-item.is-active { background: var(--cl-surface-soft); }
+.cl-menu.cl-menu-rounds .cl-menu-item b .cl-count { font-weight: 500; }
 .cl-drawer-body { flex: 1; overflow-y: auto; border-top: 1px solid var(--cl-surface-line); padding-bottom: 12px; }
 .cl-drawer .cl-round-note { margin: 14px 18px 4px; padding: 10px 12px; border-left: 2px solid var(--cl-accent); background: var(--cl-surface-soft); border-radius: 0 8px 8px 0; font-size: 12.5px; color: var(--cl-fg-soft); }
 .cl-drawer .cl-empty { margin: 0; padding: 20px 18px; font-size: 13px; color: var(--cl-fg-soft); }
