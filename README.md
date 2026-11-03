@@ -6,7 +6,7 @@ Drop a pin, leave a note. Private review comments on any website: only the peopl
 invite link see them, and nothing is ever posted publicly. MIT licensed. Built by [Summit ML](https://summitml.com/products/open-source).
 
 ```sh
-npm install @summitml/commentlayer
+npm install commentlayer
 ```
 
 Or work from source:
@@ -34,7 +34,7 @@ or rename rounds, and older rounds are viewable read-only.
 ```
 
 ```ts
-import { createCommentStore, createHandler, filePersistence } from "@summitml/commentlayer";
+import { createCommentStore, createHandler, filePersistence } from "commentlayer";
 
 const store = createCommentStore({
   persistence: filePersistence(process.env.COMMENTLAYER_DATA_DIR ?? "./data"),

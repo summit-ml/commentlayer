@@ -1,5 +1,5 @@
 {
-  "name": "@summitml/commentlayer",
+  "name": "commentlayer",
   "version": "0.1.0",
   "description": "Drop-a-pin review comments for any site: a client overlay plus a storage-backed request handler.",
   "license": "MIT",
@@ -25,7 +25,6 @@
     "./package.json": "./package.json"
   },
   "publishConfig": {
-    "access": "public",
     "exports": {
       ".": {
         "types": "./dist/index.d.ts",
