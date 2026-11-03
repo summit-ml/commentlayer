@@ -1,10 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import type { Persistence, StoreData } from "./core";
+import type { Persistence, StoreData } from "./core.ts";
 
-export * from "./core";
-export * from "./sheets";
+export * from "./core.ts";
+export * from "./sheets.ts";
 
 /** Absolute path to the overlay's static files, for whatever serves them. */
 export const CLIENT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../client");

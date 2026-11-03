@@ -6,8 +6,14 @@ Drop a pin, leave a note. Private review comments on any website: only the peopl
 invite link see them, and nothing is ever posted publicly. MIT licensed. Built by [Summit ML](https://summitml.com/products/open-source).
 
 ```sh
+npm install @summitml/commentlayer
+```
+
+Or work from source:
+
+```sh
 git clone https://github.com/summit-ml/commentlayer
-cd commentlayer && npm install && npm test && npm run build
+cd commentlayer && npm install && npm test && npm run build:extension
 ```
 
 **What reviewers get.** A small pill in the bottom-right corner that says how many notes are on
@@ -28,7 +34,7 @@ or rename rounds, and older rounds are viewable read-only.
 ```
 
 ```ts
-import { createCommentStore, createHandler, filePersistence } from "commentlayer";
+import { createCommentStore, createHandler, filePersistence } from "@summitml/commentlayer";
 
 const store = createCommentStore({
   persistence: filePersistence(process.env.COMMENTLAYER_DATA_DIR ?? "./data"),
@@ -48,7 +54,7 @@ runs on the free tier, serves the overlay files too so you can embed from anywhe
 
 ### 3. Browser extension (the free way)
 
-`npm run build` writes `extension/dist`. In Chrome: Extensions → Developer mode → Load unpacked →
+`npm run build:extension` writes `extension/dist`. In Chrome: Extensions → Developer mode → Load unpacked →
 pick that folder. Then open the extension's options.
 
 **Hosted layers.** Type a name, click "Create layer", done: no sign-in, no setup. Click the
@@ -118,9 +124,12 @@ the script tag (or `holiday` in the config) to preview it, or turn them off with
 
 ## Developing
 
-`npm run typecheck`, `npm test`, and `npm run build` (which writes `extension/dist` and copies the
-overlay into `worker/public`). Node 22 or newer. The library is plain TypeScript consumed as source; only
-the extension's service worker is bundled (esbuild).
+`npm run typecheck`, `npm test`, and `npm run build:extension` (which writes `extension/dist` and
+copies the overlay into `worker/public`). Node 22 or newer. The library is plain TypeScript consumed
+as source inside the repo; `npm run build` compiles it to `dist/` with type declarations, which is
+what the npm package ships along with `client/`. Only the extension's service worker is bundled
+(esbuild). Release with `pnpm publish` from this directory, which runs the build first and swaps in
+the `dist` entry points from `publishConfig`.
 
 ## Pieces
 

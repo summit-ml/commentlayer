@@ -5,3 +5,4 @@ worker/public/
 .wrangler/
 chrome-cdp-*/
 commentlayer-*.zip
+dist/

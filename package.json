@@ -1,5 +1,5 @@
 {
-  "name": "commentlayer",
+  "name": "@summitml/commentlayer",
   "version": "0.1.0",
   "description": "Drop-a-pin review comments for any site: a client overlay plus a storage-backed request handler.",
   "license": "MIT",
@@ -20,19 +20,39 @@
   "exports": {
     ".": "./src/index.ts",
     "./core": "./src/core.ts",
-    "./sheets": "./src/sheets.ts"
+    "./sheets": "./src/sheets.ts",
+    "./client/*": "./client/*",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "./core": {
+        "types": "./dist/core.d.ts",
+        "default": "./dist/core.js"
+      },
+      "./sheets": {
+        "types": "./dist/sheets.d.ts",
+        "default": "./dist/sheets.js"
+      },
+      "./client/*": "./client/*",
+      "./package.json": "./package.json"
+    }
   },
   "files": [
-    "src",
+    "dist",
     "client",
-    "worker",
-    "extension/src",
-    "scripts",
     "LICENSE",
     "README.md"
   ],
   "scripts": {
-    "build": "node scripts/build.mjs",
+    "build": "tsc -p tsconfig.build.json",
+    "build:extension": "node scripts/build.mjs",
+    "prepack": "pnpm run build",
     "typecheck": "tsc --noEmit && tsc --noEmit -p worker && tsc --noEmit -p extension",
     "test": "node --experimental-strip-types --test test/*.test.mjs",
     "package": "node scripts/package.mjs"

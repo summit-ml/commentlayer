@@ -1,4 +1,4 @@
-import type { Comment, Persistence, Round, StoreData } from "./core";
+import type { Comment, Persistence, Round, StoreData } from "./core.ts";
 
 /**
  * Google Sheets persistence: a spreadsheet with a `comments` tab and a `rounds` tab, one row per
