@@ -88,13 +88,14 @@ function init(cfg) {
   };
   const themeKey = () => 'cl-theme' + (cfg.scopeHost ? ':' + location.host : '');
   const isColor = v => typeof v === 'string' && v.trim() !== '' && CSS.supports('color', v.trim());
+  // Mixing a color with itself in sRGB makes the browser convert it, so oklch(), lab() and display-p3 values come back as plain channels.
   const rgbOf = v => {
     const probe = document.createElement('span');
-    probe.style.color = v;
+    probe.style.color = `color-mix(in srgb, ${v}, ${v})`;
     document.body.append(probe);
-    const m = getComputedStyle(probe).color.match(/[\d.]+/g) || [0, 0, 0];
+    const channels = getComputedStyle(probe).color.replace(/^.*srgb\s*|\).*$/g, '').split(/[\s/]+/);
     probe.remove();
-    return m.slice(0, 3).map(Number);
+    return channels.slice(0, 3).map(n => Math.min(255, Math.max(0, Number(n) * 255)));
   };
   const toHex = v => '#' + rgbOf(v).map(n => Math.round(n).toString(16).padStart(2, '0')).join('');
   const contrastOn = v => { const [r, g, b] = rgbOf(v); return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255 > 0.6 ? '#1f1c1f' : '#ffffff'; };
@@ -127,6 +128,7 @@ function init(cfg) {
     applyTheme();
   }
   let themeOpen = false;
+  let nameDraft = '';
   // ── holidays: the status dot becomes a small icon on the day ──────────────────
   const HOLIDAY_ICONS = {
     halloween: '<path d="M11 3h2v4h-2z"/><path d="M8 7c-3.3 0-6 3.1-6 7s2.7 7 6 7c1.5 0 2.9-.5 4-1.4 1.1.9 2.5 1.4 4 1.4 3.3 0 6-3.1 6-7s-2.7-7-6-7c-1.5 0-2.9.5-4 1.4C10.9 7.5 9.5 7 8 7z"/><path d="M9.2 8.6c-1.1 2.2-1.1 8.6 0 10.8M14.8 8.6c1.1 2.2 1.1 8.6 0 10.8" stroke="var(--cl-bg)" stroke-width="1.3" fill="none" stroke-linecap="round"/>',
@@ -221,6 +223,23 @@ function init(cfg) {
       else { bar.style.setProperty('--cl-panel-w', t.offsetWidth + 'px'); bar.style.setProperty('--cl-panel-h', t.offsetHeight + 'px'); }
     });
   });
+  // With a hovering pointer the panel opens on hover, and is-open only pins it while something needs it.
+  // Hover is tracked as a class as well as :hover: the dock is rebuilt on every render, and a class keeps the new
+  // panel clickable under a cursor that hasn't moved, where :hover alone can lapse and let the next click through.
+  // Leaving releases the pin and any click focus (which :focus-within would otherwise hold open),
+  // unless the theme form is up or the reviewer is part-way through typing.
+  const hoverable = window.matchMedia('(hover: hover)');
+  const unpin = () => { if (hoverable.matches) bar.classList.remove('is-open'); };
+  bar.addEventListener('mouseenter', () => { if (hoverable.matches) bar.classList.add('is-hover'); });
+  bar.addEventListener('mouseleave', () => {
+    bar.classList.remove('is-hover');
+    if (!hoverable.matches || themeOpen) return;
+    const focused = bar.contains(document.activeElement) ? document.activeElement : null;
+    if (focused && focused.matches('input, textarea') && focused.value) return;
+    closeMenu();
+    if (focused) focused.blur();
+    unpin();
+  });
   function mountDock(panel, tab) {
     bar.append(goo, panel, tab);
     sizer.disconnect();
@@ -237,7 +256,9 @@ function init(cfg) {
     const head = el('div', { class: 'cl-head' });
     if (mode && !name) {
       const input = el('input', { type: 'text', placeholder: 'Your name', maxlength: '80', 'aria-label': 'Your name' });
-      const form = el('form', { class: 'cl-name-form', onsubmit: e => { e.preventDefault(); const v = input.value.trim(); if (!v) return; name = v; ls.set('cl-name', v); bar.classList.remove('is-open'); renderBar(); toast('Click anywhere on the page to leave a comment.'); } }, [
+      input.value = nameDraft;
+      input.addEventListener('input', () => { nameDraft = input.value; });
+      const form = el('form', { class: 'cl-name-form', onsubmit: e => { e.preventDefault(); const v = input.value.trim(); if (!v) return; name = v; nameDraft = ''; ls.set('cl-name', v); bar.classList.remove('is-open'); renderBar(); toast('Click anywhere on the page to leave a comment.'); } }, [
         input, el('button', { class: 'cl-primary', type: 'submit', text: 'Start' })
       ]);
       head.append(el('div', { class: 'cl-head-text' }, [el('b', { text: 'Comment as' }), form, el('small', { class: 'cl-private', text: 'Private to this layer. Nothing you write here is public.' })]));
@@ -278,13 +299,13 @@ function init(cfg) {
           swatch, hex
         ]);
       });
-      const form = el('form', { class: 'cl-theme', onsubmit: e => { e.preventDefault(); saveTheme(draft()); themeOpen = false; renderBar(); toast('Theme saved for this site.'); } }, [
+      const form = el('form', { class: 'cl-theme', onsubmit: e => { e.preventDefault(); saveTheme(draft()); themeOpen = false; unpin(); renderBar(); toast('Theme saved for this site.'); } }, [
         ...rows,
         el('div', { class: 'cl-theme-actions' }, [
           el('button', { class: 'cl-primary', type: 'submit', text: 'Save' }),
-          el('button', { type: 'button', text: 'Use site colors', onclick: () => { saveTheme({}); themeOpen = false; renderBar(); } }),
+          el('button', { type: 'button', text: 'Use site colors', onclick: () => { saveTheme({}); themeOpen = false; unpin(); renderBar(); } }),
           el('span', { class: 'cl-spacer' }),
-          el('button', { type: 'button', text: 'Cancel', onclick: () => { themeOpen = false; renderBar(); } })
+          el('button', { type: 'button', text: 'Cancel', onclick: () => { themeOpen = false; unpin(); renderBar(); } })
         ])
       ]);
       mountDock(el('div', { class: 'cl-panel', role: 'group', 'aria-label': 'CommentLayer theme' }, [
@@ -426,19 +447,22 @@ function init(cfg) {
     layer.classList.toggle('cl-on', on);
     closePop();
     if (on && !name) bar.classList.add('is-open');
+    if (!on) unpin();
     renderBar();
     if (on) { renderPins(); if (name) toast('Click anywhere on the page to leave a comment.'); }
   }
 
   function renderPins() {
-    layer.replaceChildren();
+    // Only saved pins are redrawn. An open popover and its draft pin stay where they are, so a refresh never interrupts typing.
+    layer.querySelectorAll('.cl-pin:not(.cl-draft)').forEach(p => p.remove());
+    const kept = layer.firstChild;
     const ordered = comments.slice().sort((a, b) => a.createdAt.localeCompare(b.createdAt));
     ordered.forEach((c, i) => {
       const p = resolvePoint(c);
       const pin = el('button', { class: 'cl-pin' + (c.resolved ? ' cl-resolved' : '') + (viewingOld() ? ' cl-old' : ''), type: 'button', text: String(i + 1), title: `${c.author}: ${c.text.slice(0, 80)}`, 'data-id': c.id, onclick: e => { e.stopPropagation(); openPop(c, pin); } });
       pin.style.left = p.left + 'px';
       pin.style.top = p.top + 'px';
-      layer.append(pin);
+      layer.insertBefore(pin, kept);
     });
   }
 
@@ -465,7 +489,7 @@ function init(cfg) {
     pop.append(text, reactionRow(c));
     const actions = el('div', { class: 'cl-actions' });
     actions.append(el('button', { type: 'button', text: c.resolved ? 'Reopen' : 'Resolve', onclick: async () => {
-      try { const u = await api('PATCH', `${API}/${c.id}`, { resolved: !c.resolved }); Object.assign(c, u); await refresh(); toast(u.resolved ? 'Marked resolved.' : 'Reopened.'); } catch (err) { toast(err.message); }
+      try { const u = await api('PATCH', `${API}/${c.id}`, { resolved: !c.resolved }); Object.assign(c, u); await refresh(); closePop(); toast(u.resolved ? 'Marked resolved.' : 'Reopened.'); } catch (err) { toast(err.message); }
     } }));
     if (c.mine) {
       actions.append(el('button', { type: 'button', text: 'Edit', onclick: () => {
@@ -666,6 +690,8 @@ function init(cfg) {
     setTimeout(() => openPop(c, pin), 350);
   }
 
+  // The theme form and an open Export menu live in the dock; rebuilding it under them would throw away what the reviewer is doing.
+  const dockBusy = () => themeOpen || (openMenu && bar.contains(openMenu));
   async function refresh() {
     try {
       const [list, info] = await Promise.all([api('GET', API), api('GET', VERSIONS)]);
@@ -674,10 +700,10 @@ function init(cfg) {
       currentVersion = info.current;
       if (!versions.some(v => v.id === view)) view = currentVersion;
       comments = all.filter(c => c.page === page && c.version === view);
-      renderBar();
+      if (!dockBusy()) renderBar();
       renderPins();
     } catch (err) {
-      renderBar();
+      if (!dockBusy()) renderBar();
       const sheetUrl = cfg.layer && cfg.layer.url;
       if (err && err.needsAccess && sheetUrl) toast("You don't have access to this layer's sheet yet.", { label: 'Request access', href: sheetUrl + '/edit' }, 10000);
       else toast('Comments unavailable right now.');
@@ -696,7 +722,7 @@ function init(cfg) {
   }, true);
   document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeMenu(); closePop(); closeDrawer(); bar.classList.remove('is-open'); if (themeOpen) { themeOpen = false; renderBar(); } } });
   let raf = 0;
-  const relayout = () => { if (!mode) return; cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { renderPins(); if (activePop) closePop(); }); };
+  const relayout = () => { if (!mode) return; cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { renderPins(); const ta = activePop && activePop.querySelector('textarea'); if (activePop && !(ta && ta.value.trim())) closePop(); }); };
   window.addEventListener('resize', relayout);
   window.addEventListener('load', () => { if (mode) renderPins(); });
   new ResizeObserver(relayout).observe(document.body);
@@ -716,7 +742,7 @@ function init(cfg) {
   window.addEventListener('popstate', onNavigate);
   // Quiet poll so teammates' pins show up without a reload. Skipped while something is being edited.
   setInterval(() => {
-    if (document.hidden || activePop || themeOpen || drawer) return;
+    if (document.hidden || activePop || themeOpen || drawer || openMenu) return;
     if (bar.contains(document.activeElement)) return;
     refresh();
   }, 20000);
