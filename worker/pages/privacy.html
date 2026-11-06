@@ -21,7 +21,7 @@
   <p>Effective November 6, 2026. This policy covers the CommentLayer browser extension and the hosted layer service at <code>commentlayer.summitml.com</code>, both run by Summit ML. CommentLayer is open source, so everything described here can be checked against <a href="https://github.com/summit-ml/commentlayer">the code</a>.</p>
 
   <div class="doc-card">
-    <p><b>The short version.</b> There are no accounts, no ads, and no analytics. The extension does nothing on a site until you turn it on there. The notes you leave on a hosted layer are stored on our server so the people with the layer's invite link can see them, and they are deleted 30 days after the layer's last note.</p>
+    <p><b>The short version.</b> There are no accounts, no ads, and no analytics. The extension does nothing on a site until you turn it on there. The notes you leave on a hosted layer are stored on our server so the people with the layer's invite link can see them, and they are deleted 30 days after the last change to the layer.</p>
   </div>
 
   <h2>What stays in your browser</h2>
@@ -49,13 +49,15 @@
     <li>When you create, join, or delete a hosted layer.</li>
     <li>On sites where you turned a hosted layer on: to load the layer's notes, to check for new ones about every twenty seconds, and to save what you write.</li>
   </ul>
-  <p>On every other site the extension sends nothing.</p>
+  <p>On every other site the extension sends nothing and adds nothing to the page.</p>
 
   <h2>Who can see your notes</h2>
   <p>Anyone who has a layer's invite link can read every note on that layer and add their own. The link is the access control, the same way a shared document link works, so send it only to people who should see the notes. Nothing is posted to the site being reviewed, and layers are not listed or searchable anywhere.</p>
+  <p>The notes are drawn on top of the page you are reviewing, in your browser. That means the page's own scripts, including any analytics or session-recording tools it runs, could technically read the notes shown there, and the full list of a layer's notes when you open it. Keep that in mind before reviewing a site you don't trust.</p>
+  <p>Opening an invite link does not join anything. The invite page shows the layer's name and waits for you to click Join.</p>
 
   <h2>How long we keep it</h2>
-  <p>A hosted layer and everything on it is deleted automatically 30 days after its last note. The person who created a layer can delete it sooner from the extension's options page, and anyone on a layer can export its notes as CSV or JSON first. You can edit or delete your own notes at any time.</p>
+  <p>A hosted layer and everything on it is deleted automatically 30 days after the last change to it. A change is a new note, an edit, a vote, a resolve, or a new or renamed review round; opening or reading a layer does not count. The person who created a layer can delete it sooner from the extension's options page, and anyone on a layer can export its notes as CSV or JSON first. You can edit or delete your own notes at any time.</p>
 
   <h2>Who processes it</h2>
   <p>The hosted service runs on Cloudflare Workers and stores layers in Cloudflare's key-value storage. Cloudflare handles network-level data such as IP addresses in order to deliver and protect the service; our code does not record IP addresses or build profiles of visitors. The join page and this page load their fonts from Google Fonts, which involves a request from your browser to Google. We do not sell or share your data with anyone else, and we do not use it for advertising, for creditworthiness or lending decisions, or for anything other than showing review notes to the people on a layer.</p>

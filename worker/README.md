@@ -20,7 +20,7 @@ npx wrangler deploy
 | `/api/l/:id/comments…`, `/api/l/:id/versions…` | The normal CommentLayer API, scoped to one layer, behind `X-Layer-Key`. `X-Comment-Admin: <adminKey>` unlocks rounds and moderation. |
 
 One KV value per layer, written with a sliding TTL (`LAYER_TTL_DAYS`, default 30): a layer is
-deleted that many days after its last note. Reviewers export CSV or JSON from the overlay any
+deleted that many days after its last change (a note, an edit, a vote, a resolve, a round). Reviewers export CSV or JSON from the overlay any
 time. Keys are stored hashed.
 
 ## Pages

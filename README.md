@@ -93,21 +93,23 @@ runs on the free tier, serves the overlay files too so you can embed from anywhe
 ### 3. Browser extension (the free way)
 
 For Chrome. `npm run build:extension` writes `extension/dist`. In Chrome: Extensions → Developer
-mode → Load unpacked → pick that folder. Then open the extension's options. The extension asks
-for storage and access to all sites, so it can show the overlay on whichever site you turn it on
-for; it does nothing on a site until you click its toolbar icon there.
+mode → Load unpacked → pick that folder. Then open the extension's options. Its permissions
+are storage, scripting, and access to all sites, so it can show the overlay on whichever site
+you turn it on for; until you click its toolbar icon on a site, it adds nothing to that page and
+sends nothing.
 
 **Hosted layers.** Type a name, click "Create layer", done: no sign-in, no setup. Click the
 toolbar icon on any site to turn the layer on there, then drop pins. To invite teammates, click
 "Copy invite" in the options, or "Share" in the drawer, and send the link. It opens a join page
-at `commentlayer.summitml.com/join`: with the extension installed, the layer is added on the
-spot; without it, the page says how to install and then finishes the join when they come back.
+at `commentlayer.summitml.com/join`: with the extension installed, one click on "Join this layer"
+adds it; without it, the page says how to install and picks up when they come back. Nothing is
+joined just by opening a link.
 Access control is the link itself, the same way a shared Figma or Loom link works. The creator
 is the layer's admin (rounds, moderation, deletion) without typing a token.
 
 Hosted layers live on the Worker in `worker/` (Summit ML runs it at `HOSTED_API`, set in
 `extension/src/background.ts`). Each layer is one KV value, written with a sliding TTL: a layer
-is deleted 30 days after its last note. Export CSV or JSON from the overlay any time, or delete
+is deleted 30 days after its last change (a note, an edit, a vote, a resolve, a round). Export CSV or JSON from the overlay any time, or delete
 the layer early from the options page. What is stored, and for how long, is spelled out in the
 [privacy policy](https://commentlayer.summitml.com/privacy).
 

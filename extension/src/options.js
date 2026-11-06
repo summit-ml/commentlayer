@@ -14,7 +14,7 @@ function render() {
   if (!state.layers.length) { root.innerHTML = '<p class="empty">No layers yet. Create one below.</p>'; return; }
   root.innerHTML = state.layers.map(l => {
     const sites = Object.keys(l.sites);
-    const where = l.type === 'hosted' ? `Hosted · kept ${l.ttlDays || 30} days after the last note${l.adminKey ? ' · you are the admin' : ''}` : l.type === 'sheet' ? `Google Sheet · <a href="${esc(l.url)}" target="_blank" rel="noopener">open</a>` : `Backend · ${esc(l.api)}`;
+    const where = l.type === 'hosted' ? `Hosted · kept ${l.ttlDays || 30} days after the last change${l.adminKey ? ' · you are the admin' : ''}` : l.type === 'sheet' ? `Google Sheet · <a href="${esc(l.url)}" target="_blank" rel="noopener">open</a>` : `Backend · ${esc(l.api)}`;
     return `<div class="card layer" data-id="${esc(l.id)}">
       <div><b>${esc(l.name)}</b><div class="meta">${where}</div></div>
       <div class="actions">

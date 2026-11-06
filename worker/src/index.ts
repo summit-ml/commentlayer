@@ -5,7 +5,7 @@ import { createCommentStore, createHandler, sha256, type Persistence, type Store
  *
  * Hosted layers: `POST /api/layers` mints a layer (id, invite key, admin key) and every
  * comment route lives under `/api/l/<id>/…` behind the `X-Layer-Key` header. One KV value per
- * layer, written with a sliding TTL so a layer disappears LAYER_TTL_DAYS after its last note.
+ * layer, written with a sliding TTL so a layer disappears LAYER_TTL_DAYS after its last change.
  *
  * `/api/commentlayer/*` is the single-tenant backend for people who deploy their own Worker;
  * it keeps the `data` key and the optional ADMIN_TOKEN secret from earlier versions.

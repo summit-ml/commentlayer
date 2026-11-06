@@ -22,7 +22,7 @@ CommentLayer puts review comments on the page itself. Turn it on, click the thin
 
 How it works
 • Create a layer in one click. No account, no sign-in.
-• Copy the invite link and send it to your team. Anyone with the link can comment.
+• Copy the invite link and send it to your team. Anyone with the link can join and comment.
 • Click the toolbar icon on any site to turn the layer on there, then click anything to leave a note.
 
 What you get
@@ -34,7 +34,7 @@ What you get
 • Themes itself to the site's brand colors
 
 Private by design
-Only people with your invite link can see your notes, and nothing is ever posted to the site. A layer is deleted automatically 30 days after its last note, or whenever you delete it. Prefer to keep data on your own servers? Point the extension at your own CommentLayer backend instead.
+Only people with your invite link can see your notes, and nothing is ever posted to the site. A layer is deleted automatically 30 days after its last change, or whenever you delete it. Prefer to keep data on your own servers? Point the extension at your own CommentLayer backend instead.
 
 Open source under the MIT license: https://github.com/summit-ml/commentlayer
 Built by Summit ML: https://summitml.com/products/open-source
@@ -59,7 +59,8 @@ Leave and read review comments pinned to elements on web pages, shared with the 
 **Permission justifications:**
 
 - `storage`: Saves the reviewer's layers, display name, theme colors, and a random identifier used to edit their own comments.
-- Host permission (all sites): Reviewers comment on whatever site they are reviewing, so the comment overlay must be able to load on any page, and the toolbar icon reads the current tab's address to turn a layer on or off for that site and show whether it is active there. The overlay stays dormant until the user turns it on for a site. When the user drops a pin it records the clicked element's position, CSS selector, tag, and a short label or text snippet (up to 120 characters) so teammates can find the pin; it reads nothing else from the page.
+- `scripting`: Adds the overlay's stylesheet to a tab, and only on a site the user has turned a layer on for. Nothing is added to pages on other sites.
+- Host permission (all sites): Reviewers comment on whatever site they are reviewing, so the comment overlay must be able to load on any page, and the toolbar icon reads the current tab's address to turn a layer on or off for that site and show whether it is active there. The overlay stays dormant until the user turns it on for a site. When the user drops a pin it records the clicked element's position, CSS selector, tag, and a short label or text snippet (up to 120 characters) so teammates can find the pin; it sends nothing else from the page.
 
 **Remote code:** No, I am not using remote code. (All JavaScript ships in the package.)
 

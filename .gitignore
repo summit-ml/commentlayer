@@ -6,3 +6,4 @@ worker/public/
 chrome-cdp-*/
 commentlayer-*.zip
 dist/
+package-lock.json

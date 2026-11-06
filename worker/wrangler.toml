@@ -24,7 +24,7 @@ port = 8790
 directory = "./public"
 
 [vars]
-# A hosted layer is deleted this many days after its last note.
+# A hosted layer is deleted this many days after its last change (a note, an edit, a vote, a resolve, a round).
 LAYER_TTL_DAYS = "30"
 # Where /install sends people from the invite page. Swap in the Chrome Web Store listing once
 # the extension has one.
