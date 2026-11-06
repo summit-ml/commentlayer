@@ -7,6 +7,10 @@
 
 function init(cfg) {
   if (document.querySelector('.cl-bar')) return;
+  // An allowlist of hostnames (data-hosts on the script tag, or hosts in the config). Anywhere else the overlay
+  // stays out, so a tag that ships to production by mistake does nothing. "*.example.com" matches subdomains.
+  const hosts = String((script && script.dataset.hosts) || cfg.hosts || '').toLowerCase().split(',').map(h => h.trim()).filter(Boolean);
+  if (hosts.length && !hosts.some(h => h === location.hostname || h === location.host || (h.startsWith('*.') && location.hostname.endsWith(h.slice(1))))) return;
   const VERSION = '0.1.0';
   const ABOUT_URL = 'https://summitml.com/products/open-source#commentlayer';
   const REPO_URL = 'https://github.com/summit-ml/commentlayer';
