@@ -23,6 +23,7 @@
   --cl-ok-soft: color-mix(in srgb, #3fae6a 16%, transparent);
 }
 .cl-ui, .cl-ui * { box-sizing: border-box; }
+.cl-ui { text-align: start; }
 .cl-pin.cl-old { background: var(--cl-surface); color: var(--cl-surface-fg); border-color: var(--cl-surface-muted); border-style: dashed; box-shadow: none; }
 .cl-pin.cl-old.cl-resolved { background: var(--cl-surface); color: var(--cl-surface-muted); border-color: var(--cl-surface-line); }
 body:has(> .cl-layer.cl-on), body:has(> .cl-layer.cl-on) a, body:has(> .cl-layer.cl-on) button, body:has(> .cl-layer.cl-on) summary, body:has(> .cl-layer.cl-on) label { cursor: crosshair; }
