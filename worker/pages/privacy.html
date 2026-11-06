@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Privacy · CommentLayer</title>
 <meta name="description" content="What the CommentLayer browser extension and hosted layers store, where, and for how long.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Sofia+Sans:wght@700&family=Space+Grotesk:wght@400;500;600;700&display=swap">
@@ -60,7 +61,7 @@
   <p>A hosted layer and everything on it is deleted automatically 30 days after the last change to it. A change is a new note, an edit, a vote, a resolve, or a new or renamed review round; opening or reading a layer does not count. The person who created a layer can delete it sooner from the extension's options page, and anyone on a layer can export its notes as CSV or JSON first. You can edit or delete your own notes at any time.</p>
 
   <h2>Who processes it</h2>
-  <p>The hosted service runs on Cloudflare Workers and stores layers in Cloudflare's key-value storage. Cloudflare handles network-level data such as IP addresses in order to deliver and protect the service; our code does not record IP addresses or build profiles of visitors. The join page and this page load their fonts from Google Fonts, which involves a request from your browser to Google. We do not sell or share your data with anyone else, and we do not use it for advertising, for creditworthiness or lending decisions, or for anything other than showing review notes to the people on a layer.</p>
+  <p>The hosted service runs on Cloudflare Workers and stores each layer in Cloudflare's Durable Object storage. Cloudflare handles network-level data such as IP addresses in order to deliver and protect the service; our code does not record IP addresses or build profiles of visitors. The join page and this page load their fonts from Google Fonts, which involves a request from your browser to Google. We do not sell or share your data with anyone else, and we do not use it for advertising, for creditworthiness or lending decisions, or for anything other than showing review notes to the people on a layer.</p>
   <p>The use of information received by the extension adheres to the <a href="https://developer.chrome.com/docs/webstore/program-policies/user-data-faq">Chrome Web Store User Data Policy</a>, including its Limited Use requirements.</p>
 
   <h2>Your own backend, and the embed</h2>

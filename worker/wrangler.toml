@@ -30,6 +30,16 @@ LAYER_TTL_DAYS = "30"
 # the extension has one.
 STORE_URL = "https://github.com/summit-ml/commentlayer#3-browser-extension-the-free-way"
 
+# Each layer is one Durable Object, so everyone on a layer reads and writes the same copy.
+[[durable_objects.bindings]]
+name = "LAYERS"
+class_name = "Layer"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Layer"]
+
+# Layers used to live here. Still bound so one written by an earlier version is picked up on first use.
 [[kv_namespaces]]
 binding = "COMMENTS"
 id = "5c7c85d229464950a1e42a13f1b863f9"

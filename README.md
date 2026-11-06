@@ -87,7 +87,7 @@ does nothing, even if the tag ships by mistake:
 
 ### 2. Deploy the backend to Cloudflare (free)
 
-`worker/` is a Worker with KV storage. See [worker/README.md](worker/README.md). Three commands,
+`worker/` is a Worker that keeps each layer in a Durable Object. See [worker/README.md](worker/README.md). Three commands,
 runs on the free tier, serves the overlay files too so you can embed from anywhere.
 
 ### 3. Browser extension (the free way)
@@ -108,7 +108,7 @@ Access control is the link itself, the same way a shared Figma or Loom link work
 is the layer's admin (rounds, moderation, deletion) without typing a token.
 
 Hosted layers live on the Worker in `worker/` (Summit ML runs it at `HOSTED_API`, set in
-`extension/src/background.ts`). Each layer is one KV value, written with a sliding TTL: a layer
+`extension/src/background.ts`). Each layer is one Durable Object, so teammates anywhere see the same notes at once: a layer
 is deleted 30 days after its last change (a note, an edit, a vote, a resolve, a round). Export CSV or JSON from the overlay any time, or delete
 the layer early from the options page. What is stored, and for how long, is spelled out in the
 [privacy policy](https://commentlayer.summitml.com/privacy).
@@ -185,7 +185,7 @@ itself has no automated tests yet.
 - `src/index.ts`: the Node entry. Re-exports core and adds `filePersistence(dir)` and `CLIENT_DIR`.
 - `src/sheets.ts`: `sheetsPersistence({ spreadsheetId, token })` and `createLayerSpreadsheet()`,
   a Google Sheets persistence adapter. Runs anywhere `fetch` does.
-- `worker/`: Cloudflare Worker. Hosted layers (`/api/layers`, `/api/l/<id>/…`, one KV value
+- `worker/`: Cloudflare Worker. Hosted layers (`/api/layers`, `/api/l/<id>/…`, one Durable Object
   per layer with a sliding TTL), the single-tenant `/api/commentlayer` backend, and the static
   pages in `worker/pages`: the invite page (`/join`) and the privacy policy (`/privacy`).
 - `extension/src/`: Manifest V3 extension. `background.ts` (bundled by the build) holds the
