@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Join a CommentLayer</title>
+<meta name="description" content="You've been invited to leave private review comments on a site with CommentLayer. Open the link and you're in.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Sofia+Sans:wght@700&family=Space+Grotesk:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="/site.css">
+<link rel="stylesheet" href="/join.css">
+</head>
+<body>
+<header class="site-top"><div class="site-top-inner"><a class="site-logo" href="https://summitml.com" aria-label="Summit ML"><img src="/summitml.svg" alt="Summit ML" width="182" height="22"></a></div></header>
+
+<div class="hn clj">
+  <section class="clj-wrap">
+    <a href="#how" class="clj-peek"><span>How it works</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></a>
+
+    <div class="jd" aria-hidden="true">
+      <div class="jd-frame">
+        <div class="jd-bar"><span></span><span></span><span></span></div>
+        <div class="jd-page">
+          <div class="jd-nav"><i></i><i></i><i></i><i></i></div>
+          <div class="jd-h jd-h1"></div>
+          <div class="jd-h jd-h2"></div>
+          <div class="jd-row"><div class="jd-card"></div><div class="jd-card"></div><div class="jd-card"></div></div>
+          <div class="jd-p"></div><div class="jd-p jd-p2"></div><div class="jd-p jd-p3"></div>
+          <div class="jd-spot jd-spot-1"><span class="jd-ripple"></span><span class="jd-pin">1</span><div class="jd-pop"><b>Jeff</b><span class="jd-text">Can this headline lose a word?</span></div></div>
+          <div class="jd-spot jd-spot-2"><span class="jd-ripple"></span><span class="jd-pin">2</span><div class="jd-pop"><b>Jeff</b><span class="jd-text">Middle card needs a hover state.</span></div></div>
+          <div class="jd-spot jd-spot-3"><span class="jd-ripple"></span><span class="jd-pin">3</span><div class="jd-pop"><b>Jeff</b><span class="jd-text">Tighten this paragraph a touch.</span></div></div>
+          <svg class="jd-cursor" viewBox="0 0 16 16"><path d="M2 1l10 7-4.5.8L10 14l-2 .9-2.5-5.2L2 13z" fill="#fff" stroke="#1f1c1f" stroke-width="1"/></svg>
+        </div>
+        <div class="jd-pill"><i></i> Comments <span class="jd-count"><span>(0)</span><span>(1)</span><span>(2)</span><span>(3)</span></span></div>
+      </div>
+      <div class="jd-thread" id="thread"></div>
+    </div>
+
+    <div class="clj-card">
+      <button type="button" class="clj-callout" id="callout" hidden><i></i> Were you sent an invite? <span>Start here</span></button>
+      <span class="clj-brand" aria-label="commentLayer">
+        <svg viewBox="0 0 64 64" width="22" height="22" aria-hidden="true"><rect x="8" y="28" width="48" height="28" rx="8" fill="#2a2529" stroke="#f0efeb" stroke-opacity=".4" stroke-width="4"/><rect x="8" y="10" width="48" height="28" rx="8" fill="#1f1c1f" stroke="#f0efeb" stroke-width="4"/><circle cx="44" cy="18" r="11" fill="#c94a8f"/></svg>
+        <span class="clj-wordmark">comment<span>Layer</span></span>
+      </span>
+
+      <div id="no-invite" hidden>
+        <h1 class="clj-h1">Review any site <em>together</em>.</h1>
+        <p class="clj-p">CommentLayer is a browser extension for leaving private notes pinned to the exact spot on a page. Install it, create a layer in <u class="clj-u">one click</u>, and send your team the invite link. Nothing is public: only people with the link can see a note, and a layer is kept 30 days after its last note.</p>
+        <div class="clj-install">
+          <a href="/install" target="_blank" rel="noopener" class="hn-btn hn-btn-primary">Get the extension <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
+          <small>Free and open source. Chrome for now.</small>
+          <p class="clj-fallback" id="invite-help">
+            Were you sent an invite? This link is missing its layer. A complete invite looks like this, with the layer and key after the <code class="clj-inline">#</code>:
+            <code>commentlayer.summitml.com/join#layer=<span class="clj-dim">…id…</span>&amp;key=<span class="clj-dim">…key…</span>&amp;name=<span class="clj-dim">Website redesign</span></code>
+            Ask whoever sent it to copy the invite again from the extension's options, or paste the whole link into the extension yourself under “Have an invite link?”.
+          </p>
+        </div>
+      </div>
+
+      <div id="has-invite" hidden>
+        <h1 class="clj-h1">You're invited to <em id="invite-name"></em>.</h1>
+        <p class="clj-p">A private review layer: drop pins on the site, leave notes, and only the people with this link see them. Nothing is posted publicly, and the site itself doesn't change.</p>
+
+        <p class="clj-status" id="st-checking"><span class="clj-spin"></span> Checking for the extension…</p>
+        <p class="clj-status" id="st-connecting" hidden><span class="clj-spin"></span> <span id="connecting-text">Extension found. Finishing the join.</span></p>
+
+        <div class="clj-ok" id="st-joined" hidden>
+          <b>You're in.</b>
+          <ol>
+            <li>Go to the site you're reviewing.</li>
+            <li>Click the CommentLayer icon in your toolbar. The pill appears bottom-right.</li>
+            <li>Flip the switch and click anything to leave a note.</li>
+          </ol>
+        </div>
+
+        <div class="clj-fail" id="st-failed-access" hidden>
+          <b>You need access to the layer's sheet.</b>
+          <p>This layer is a Google Sheet that hasn't been shared with the account you signed in with. Request access and Google emails the owner; ask them to grant you “Editor” so you can leave notes. Then come back here and try again.</p>
+          <div class="clj-actions">
+            <a id="sheet-link" target="_blank" rel="noopener" class="hn-btn hn-btn-primary">Request layer access <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
+            <button type="button" class="hn-btn hn-btn-ghost" data-retry>Try again</button>
+          </div>
+        </div>
+
+        <div class="clj-fail" id="st-failed" hidden>
+          <b>Couldn't join yet.</b>
+          <p id="fail-reason"></p>
+          <button type="button" class="hn-btn hn-btn-primary" data-retry>Try again</button>
+        </div>
+
+        <div class="clj-install" id="st-install" hidden>
+          <ol>
+            <li>
+              <b>Install the CommentLayer extension.</b>
+              <a href="/install" target="_blank" rel="noopener" class="hn-btn hn-btn-primary">Get the extension <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
+              <small>Free and open source. Chrome for now.</small>
+            </li>
+            <li>
+              <b>Come back to this link.</b> It will finish the join on its own.
+            </li>
+          </ol>
+          <p class="clj-fallback"><span id="installed-help"></span><code id="installed-code" hidden></code></p>
+        </div>
+      </div>
+
+      <p class="clj-foot">
+        <a href="https://summitml.com/products/open-source#commentlayer">What is CommentLayer?</a>
+        <a href="/install" target="_blank" rel="noopener">Get the extension</a>
+      </p>
+    </div>
+  </section>
+
+  <section class="clj-how" id="how">
+    <div class="clj-how-inner">
+      <div class="hn-head" data-reveal>
+        <p class="hn-kicker">How it works</p>
+        <h2 class="hn-h2">Three steps, no accounts, nothing public.</h2>
+      </div>
+      <ol class="clj-steps">
+        <li class="clj-step" data-reveal style="--d:0ms">
+          <div class="clj-step-art">
+            <div class="clj-art clj-art-browser">
+              <div class="clj-art-chrome"><i></i><i></i><i></i><span class="clj-art-url"></span><span class="clj-art-ext"><svg viewBox="0 0 64 64" width="22" height="22" aria-hidden="true"><rect x="8" y="28" width="48" height="28" rx="8" fill="#2a2529" stroke="#f0efeb" stroke-opacity=".4" stroke-width="4"/><rect x="8" y="10" width="48" height="28" rx="8" fill="#1f1c1f" stroke="#f0efeb" stroke-width="4"/><circle cx="44" cy="18" r="11" fill="#c94a8f"/></svg><b>ON</b></span></div>
+              <div class="clj-art-body"><div class="clj-art-line w60"></div><div class="clj-art-line w40"></div></div>
+            </div>
+          </div>
+          <span class="clj-step-n">01</span>
+          <h3 class="hn-h3">Get the extension</h3>
+          <p class="hn-p">Install it once. The commentLayer icon lands in your toolbar; click it on any site to turn a layer on there.</p>
+        </li>
+        <li class="clj-step" data-reveal style="--d:110ms">
+          <div class="clj-step-art">
+            <div class="clj-art clj-art-sheet">
+              <div class="clj-art-doc"><div class="clj-art-grid"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+              <div class="clj-art-share">
+                <span class="clj-avatars"><i style="background:#8a3a6a">MR</i><i style="background:#3a5f8a">DK</i><i style="background:#3a8a62">PS</i></span>
+                <b>Shared</b>
+              </div>
+            </div>
+          </div>
+          <span class="clj-step-n">02</span>
+          <h3 class="hn-h3">Send the invite link</h3>
+          <p class="hn-p">Create a layer in one click and copy its invite link. Everyone who opens it is in: no accounts, no sharing settings, nothing to approve.</p>
+        </li>
+        <li class="clj-step" data-reveal style="--d:220ms">
+          <div class="clj-step-art">
+            <div class="clj-art clj-art-page">
+              <div class="clj-art-body">
+                <div class="clj-art-line w60"></div><div class="clj-art-line w40"></div>
+                <div class="clj-art-cards"><i></i><i></i><i></i></div>
+                <span class="jd-pin clj-art-pin" style="left:58%;top:10px">1</span>
+                <span class="jd-pin clj-art-pin" style="left:44%;top:62px">2</span>
+                <span class="jd-pin clj-art-pin" style="left:16%;top:96px">3</span>
+              </div>
+              <div class="clj-art-pill"><i></i> Comments <span>(3)</span></div>
+            </div>
+          </div>
+          <span class="clj-step-n">03</span>
+          <h3 class="hn-h3">Begin collaborating</h3>
+          <p class="hn-p">Everyone on the layer drops pins and leaves notes on the live page. Private to your link, kept 30 days after the last note, and exportable any time.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+</div>
+
+<footer class="site-end"><div class="site-end-inner">
+  <a href="https://summitml.com">Built by Summit ML</a>
+  <a href="https://summitml.com/products/open-source">Our open source products</a>
+  <a href="https://github.com/summit-ml/commentlayer">GitHub</a>
+  <a href="/privacy">Privacy</a>
+</div></footer>
+
+<script>
+  const $ = id => document.getElementById(id);
+
+  // Placeholder reactions until the extension has store reviews to pull from. Names are invented.
+  const REACTIONS = [
+    ['Maya R.', 'Product designer', 'Finally stopped sending screenshots with red circles on them.', 330],
+    ['Devon K.', 'Founder', 'Set up in two minutes. One link and the whole team was in.', 210],
+    ['Priya S.', 'Front-end developer', "Pins stay put after I fix the layout. That's the whole trick.", 160],
+    ['Tom A.', 'Agency PM', 'Clients leave notes themselves now. Fewer calls, shorter emails.', 30],
+    ['Lena M.', 'Marketing lead', 'Rounds map perfectly onto our Tuesday reviews.', 270],
+    ['Chris O.', 'QA', 'Export to CSV, paste into the tracker, done.', 190],
+    ['Sam W.', 'Freelancer', 'No accounts for my clients. That alone sold me.', 0],
+    ['Nadia B.', 'Content strategist', 'Themed itself to our brand without me touching anything.', 120],
+    ['Jordan P.', 'Engineer', 'Open source, MIT, and I can run the backend myself. Yes.', 250],
+    ['Ellie T.', 'Designer', 'The pill is cute. The feedback is better.', 45],
+    ['Marcus H.', 'Dev lead', 'Embedded it on staging in one commit. Reviewers needed nothing.', 300],
+    ['Ava L.', 'Client', 'I clicked the thing that was wrong and typed. That was it.', 95]
+  ];
+  const span = (cls, text) => { const s = document.createElement('span'); s.className = cls; if (text) s.textContent = text; return s; };
+  REACTIONS.forEach(([name, role, text, hue], i) => {
+    const row = document.createElement('div');
+    row.className = 'jd-reaction';
+    row.style.cssText = `--i:${i};--slot:${i % 3};--hue:${hue}`;
+    const who = span('jd-reaction-who');
+    const b = document.createElement('b');
+    b.textContent = name;
+    who.append(b, ' · ' + role);
+    const body = span('jd-reaction-body');
+    body.append(who, span('jd-reaction-text', text));
+    row.append(span('jd-avatar', name.split(' ').map(w => w[0]).join('')), body);
+    $('thread').append(row);
+  });
+
+  const reveal = new IntersectionObserver(entries => {
+    for (const entry of entries) if (entry.isIntersecting) { entry.target.classList.add('is-in'); reveal.unobserve(entry.target); }
+  }, { threshold: 0.18, rootMargin: '0px 0px -8% 0px' });
+  document.querySelectorAll('[data-reveal]').forEach(t => reveal.observe(t));
+
+  function parseInvite() {
+    const hash = new URLSearchParams(location.hash.replace(/^#/, ''));
+    const name = hash.get('name') || 'a review layer';
+    const layerId = hash.get('layer') || '';
+    const key = hash.get('key') || '';
+    if (/^[A-Za-z0-9_-]{6,40}$/.test(layerId) && key) return { layerId, key, sheetId: '', api: '', name, sheetUrl: '' };
+    const api = hash.get('api') || '';
+    if (/^https?:\/\//.test(api)) return { layerId: '', key: '', sheetId: '', api, name, sheetUrl: '' };
+    const raw = hash.get('sheet') || new URLSearchParams(location.search).get('sheet') || '';
+    const m = raw.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+    const sheetId = m ? m[1] : /^[a-zA-Z0-9-_]{20,}$/.test(raw) ? raw : '';
+    if (!sheetId) return null;
+    return { layerId: '', key: '', sheetId, api: '', name, sheetUrl: `https://docs.google.com/spreadsheets/d/${sheetId}` };
+  }
+
+  const invite = parseInvite();
+  if (!invite) {
+    $('no-invite').hidden = false;
+    $('callout').hidden = new URLSearchParams(location.search).get('from') === 'site';
+    $('callout').addEventListener('click', () => {
+      const help = $('invite-help');
+      help.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      help.classList.remove('is-hl');
+      requestAnimationFrame(() => help.classList.add('is-hl'));
+    });
+    $('invite-help').addEventListener('animationend', e => e.currentTarget.classList.remove('is-hl'));
+  } else {
+    $('has-invite').hidden = false;
+    $('invite-name').textContent = invite.name;
+    if (invite.sheetId) {
+      $('connecting-text').textContent += ' A Google sign-in window may open; pick the account the sheet was shared with.';
+      $('sheet-link').href = invite.sheetUrl + '/edit';
+    }
+    const code = invite.api || invite.sheetUrl;
+    $('installed-help').textContent = invite.layerId
+      ? "Already installed and still seeing this? Open the extension's options and paste this page's address under “Have an invite link?”."
+      : invite.api
+        ? "Already installed and still seeing this? Open the extension's options and add this under “Advanced” as your own backend:"
+        : "Already installed and still seeing this? Open the extension's options and paste this under “Advanced”, “open a sheet someone shared with you”:";
+    if (code) { $('installed-code').textContent = code; $('installed-code').hidden = false; }
+
+    const STATES = ['checking', 'connecting', 'joined', 'failed-access', 'failed', 'install'];
+    const setState = kind => STATES.forEach(s => { $('st-' + s).hidden = s !== kind; });
+    let seen = false;
+    // The extension's content script (extension/src/join.js) answers "present" at once, then "joined".
+    addEventListener('message', e => {
+      if (e.source !== window || !e.data || e.data.source !== 'commentlayer') return;
+      seen = true;
+      if (e.data.type === 'present') setState('connecting');
+      if (e.data.type !== 'joined') return;
+      if (e.data.ok) setState('joined');
+      else if (e.data.needsAccess) setState('failed-access');
+      else { $('fail-reason').textContent = e.data.error || 'Could not join.'; setState('failed'); }
+    });
+    const ask = () => postMessage({ source: 'commentlayer-page', type: 'join', layerId: invite.layerId, key: invite.key, sheetId: invite.sheetId, api: invite.api, name: invite.name }, location.origin);
+    ask();
+    setTimeout(() => { if (!seen) setState('install'); }, 1200);
+    document.querySelectorAll('[data-retry]').forEach(b => b.addEventListener('click', () => { setState('checking'); ask(); }));
+    // A freshly installed extension only reaches tabs loaded after it, so reload when the visitor returns.
+    document.addEventListener('visibilitychange', () => { if (!document.hidden && !seen) location.reload(); });
+  }
+</script>
+</body>
+</html>

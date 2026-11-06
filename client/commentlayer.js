@@ -623,7 +623,7 @@ function init(cfg) {
   }
 
   // Share: a join link for an extension layer, or the page itself for an embed.
-  const JOIN_URL = 'https://summitml.com/commentlayer/join';
+  const JOIN_URL = 'https://commentlayer.summitml.com/join';
   function inviteText() {
     const layer = cfg.layer;
     if (layer && layer.type === 'hosted' && layer.layerId && layer.key) return { text: `${JOIN_URL}#layer=${encodeURIComponent(layer.layerId)}&key=${encodeURIComponent(layer.key)}&name=${encodeURIComponent(layer.name || 'Review layer')}`, note: 'Invite link copied. Anyone who opens it joins this layer and sees its comments.' };

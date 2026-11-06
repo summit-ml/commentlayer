@@ -1,5 +1,5 @@
-// Assembles the browser extension (extension/dist, load it unpacked) and copies the overlay
-// into the Worker's static assets.
+// Assembles the browser extension (extension/dist, load it unpacked) and the Worker's static
+// assets (worker/public): the overlay plus the join and privacy pages from worker/pages.
 import { cpSync, mkdirSync, rmSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
@@ -15,4 +15,5 @@ cpSync(path.join(root, "client"), dist, { recursive: true });
 
 mkdirSync(path.join(root, "worker/public"), { recursive: true });
 cpSync(path.join(root, "client"), path.join(root, "worker/public"), { recursive: true });
+cpSync(path.join(root, "worker/pages"), path.join(root, "worker/public"), { recursive: true });
 console.log("extension/dist and worker/public are ready");

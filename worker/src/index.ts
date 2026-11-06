@@ -9,9 +9,12 @@ import { createCommentStore, createHandler, sha256, type Persistence, type Store
  *
  * `/api/commentlayer/*` is the single-tenant backend for people who deploy their own Worker;
  * it keeps the `data` key and the optional ADMIN_TOKEN secret from earlier versions.
+ *
+ * The invite page (`/join`) and the privacy policy (`/privacy`) are static assets from
+ * `worker/pages`; `/install` sends people on to wherever the extension is installed from.
  */
 
-type Env = { COMMENTS: KVNamespace; ADMIN_TOKEN?: string; LAYER_TTL_DAYS?: string };
+type Env = { COMMENTS: KVNamespace; STORE_URL: string; ADMIN_TOKEN?: string; LAYER_TTL_DAYS?: string };
 
 type LayerRecord = StoreData & { name: string; keyHash: string; adminHash: string; createdAt: string; touchedAt: string };
 
@@ -40,6 +43,8 @@ export default {
   async fetch(req: Request, env: Env) {
     const url = new URL(req.url);
     if (req.method === "OPTIONS" && url.pathname.startsWith("/api/")) return new Response(null, { status: 204, headers: CORS });
+
+    if (url.pathname === "/install") return Response.redirect(env.STORE_URL, 302);
 
     const ttl = DAY * (Number(env.LAYER_TTL_DAYS) || 30);
     const kv = env.COMMENTS;

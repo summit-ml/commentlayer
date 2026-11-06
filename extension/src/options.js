@@ -4,7 +4,7 @@ let state = { layers: [], activeLayer: '' };
 
 const toast = text => { const t = $('toast'); t.textContent = text; t.classList.add('on'); setTimeout(() => t.classList.remove('on'), 2200); };
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
-const JOIN_URL = 'https://summitml.com/commentlayer/join';
+const JOIN_URL = 'https://commentlayer.summitml.com/join';
 const inviteFor = l => l.type === 'hosted'
   ? `${JOIN_URL}#layer=${encodeURIComponent(l.layerId)}&key=${encodeURIComponent(l.key)}&name=${encodeURIComponent(l.name)}`
   : `${JOIN_URL}#sheet=${encodeURIComponent(l.spreadsheetId)}&name=${encodeURIComponent(l.name)}`;

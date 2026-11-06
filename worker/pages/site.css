@@ -1,0 +1,48 @@
+/* Shared by the join and privacy pages: Summit ML's brand tokens and fonts, the logo bar, and the closing links. */
+:root {
+  --hn-ink: #f0efeb;
+  --hn-ink-soft: rgba(240, 239, 235, 0.72);
+  --hn-ink-muted: rgba(240, 239, 235, 0.45);
+  --hn-line: rgba(240, 239, 235, 0.1);
+  --hn-magenta: #991e66;
+  --hn-magenta-soft: #c94a8f;
+  --hn-blue: #3a6786;
+  --hn-blue-soft: #5f8ea8;
+  --hn-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --font-body: "Space Grotesk", system-ui, sans-serif;
+  --font-header: "Sofia Sans", system-ui, sans-serif;
+  --font-code: "IBM Plex Mono", ui-monospace, monospace;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { font-size: 16px; scroll-behavior: smooth; }
+body { margin: 0; background: #151315; color: var(--hn-ink); font-family: var(--font-body); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+[hidden] { display: none !important; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+.site-top { position: absolute; top: 0; left: 0; right: 0; z-index: 20; }
+.site-top-inner { max-width: 1180px; margin: 0 auto; padding: 32px 40px; }
+.site-logo { display: inline-block; opacity: 0.92; transition: opacity 160ms; }
+.site-logo:hover { opacity: 1; }
+.site-logo img { display: block; height: 22px; width: auto; }
+.site-end { border-top: 1px solid var(--hn-line); padding: 28px 40px 36px; }
+.site-end-inner { max-width: 1180px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 8px 24px; font-size: 13px; color: var(--hn-ink-muted); }
+.site-end a { color: inherit; text-decoration: underline; text-decoration-color: rgba(240, 239, 235, 0.3); text-underline-offset: 3px; }
+.site-end a:hover { color: var(--hn-ink); }
+@media (max-width: 600px) { .site-top-inner { padding: 24px 20px; } .site-end { padding: 24px 20px 32px; } }
+
+/* prose pages */
+.doc { max-width: 720px; margin: 0 auto; padding: 130px 20px 90px; }
+.doc-brand { display: inline-flex; align-items: center; gap: 9px; margin-bottom: 26px; font: 700 19px/1 "Helvetica Neue", Helvetica, Arial, sans-serif; letter-spacing: -0.01em; }
+.doc-brand span { color: #8f8a8d; }
+.doc-kicker { margin: 0 0 14px; font-family: var(--font-code); font-size: 12px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--hn-magenta-soft); }
+.doc h1 { margin: 0 0 18px; font-family: var(--font-header); font-weight: 700; font-size: clamp(2rem, 6vw, 3rem); line-height: 1.06; letter-spacing: -0.025em; text-wrap: balance; }
+.doc h2 { margin: 44px 0 10px; font-family: var(--font-header); font-weight: 700; font-size: 1.45rem; line-height: 1.15; letter-spacing: -0.015em; }
+.doc p, .doc li { color: var(--hn-ink-soft); line-height: 1.6; }
+.doc p { margin: 0 0 14px; }
+.doc ul { margin: 0 0 14px; padding-left: 22px; }
+.doc li { margin-bottom: 6px; }
+.doc b { color: var(--hn-ink); font-weight: 600; }
+.doc a { color: var(--hn-ink); text-decoration: underline; text-decoration-color: var(--hn-magenta-soft); text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
+.doc code { font-family: var(--font-code); font-size: 13px; padding: 2px 6px; border-radius: 6px; background: rgba(240, 239, 235, 0.06); color: var(--hn-ink); overflow-wrap: anywhere; }
+.doc-card { margin: 26px 0 0; padding: 22px 24px; border: 1px solid rgba(240, 239, 235, 0.12); border-radius: 18px; background: #1f1c1f; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4); }
+.doc-card p { margin: 0; }

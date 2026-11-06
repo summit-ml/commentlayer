@@ -23,11 +23,23 @@ One KV value per layer, written with a sliding TTL (`LAYER_TTL_DAYS`, default 30
 deleted that many days after its last note. Reviewers export CSV or JSON from the overlay any
 time. Keys are stored hashed.
 
+## Pages
+
+`worker/pages` holds the static pages the extension links to, copied into `public/` by
+`npm run build:extension` along with the overlay:
+
+- `/join`: the invite page. An invite link is `/join#layer=<id>&key=<key>&name=<name>`; the
+  fragment never reaches the server. With the extension installed its content script
+  (`extension/src/join.js`) adds the layer; without it the page points at `/install` and
+  finishes when the visitor comes back.
+- `/install`: redirects to `STORE_URL` in `wrangler.toml`.
+- `/privacy`: the privacy policy for the extension and hosted layers.
+
 ## Single-tenant backend (for the embed)
 
 `/api/commentlayer/*` is the same API without layers, keeping everything in one KV key, with
 `ADMIN_TOKEN` as the admin secret. The Worker also serves the overlay files at
-`/commentlayer.js` and `/commentlayer.css` (copied in by `npm run build` at the package root):
+`/commentlayer.js` and `/commentlayer.css` (copied in by `npm run build:extension` at the package root):
 
 ```html
 <link rel="stylesheet" href="https://commentlayer.<you>.workers.dev/commentlayer.css">

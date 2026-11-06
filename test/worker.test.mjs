@@ -15,7 +15,7 @@ const fakeKV = () => {
 
 const boot = () => {
   const kv = fakeKV();
-  const env = { COMMENTS: kv };
+  const env = { COMMENTS: kv, STORE_URL: "https://store.test/commentlayer" };
   const call = (method, path, { body, key, token, admin } = {}) =>
     worker.fetch(new Request(`https://cl.test${path}`, { method, headers: { "Content-Type": "application/json", ...(key ? { "X-Layer-Key": key } : {}), ...(token ? { "X-Comment-Token": token } : {}), ...(admin ? { "X-Comment-Admin": admin } : {}) }, body: body ? JSON.stringify(body) : undefined }), env);
   return { kv, call };
@@ -65,4 +65,11 @@ test("layers are isolated from each other and from the single-tenant backend", a
   assert.equal((await (await call("GET", `/api/l/${b.id}/comments`, { key: b.key })).json()).length, 0);
   assert.equal((await (await call("GET", `/api/commentlayer/comments`)).json()).length, 0);
   assert.equal((await call("GET", `/api/l/${a.id}/comments`, { key: b.key })).status, 403);
+});
+
+test("/install sends the invite page's visitors to wherever the extension is installed from", async () => {
+  const { call } = boot();
+  const res = await call("GET", "/install");
+  assert.equal(res.status, 302);
+  assert.equal(res.headers.get("location"), "https://store.test/commentlayer");
 });

@@ -1,0 +1,105 @@
+<!doctype html>
+<!-- Source for the Chrome Web Store promo images. Open with ?v=marquee (1400x560) or ?v=screenshot (1280x800); brand/README.md has the render command. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CommentLayer promo</title>
+<style>
+  :root { --ink: #f0efeb; --soft: #a29da0; --pink: #c94a8f; --pink-soft: #e9a3c9; --line: rgba(240,239,235,.14); --mono: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { position: relative; overflow: hidden; color: var(--ink); font: 400 17px/1.45 "Helvetica Neue", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;
+    background: radial-gradient(60% 55% at 78% 108%, rgba(201,74,143,.2), transparent 70%), linear-gradient(180deg, #151316, #121013); }
+  body.marquee { width: 1400px; height: 560px; }
+  body.screenshot { width: 1280px; height: 800px; }
+
+  .copy { position: absolute; }
+  .marquee .copy { left: 90px; top: 114px; width: 540px; }
+  .screenshot .copy { left: 84px; top: 124px; width: 480px; }
+  .label { display: flex; align-items: center; gap: 8px; font: 500 12px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--pink-soft); }
+  .label i { width: 8px; height: 8px; border-radius: 50%; background: var(--pink); box-shadow: 0 0 0 3px rgba(201,74,143,.25); }
+  h1 { margin: 26px 0 0; font-size: 51px; line-height: 1.07; font-weight: 700; letter-spacing: -.025em; }
+  .screenshot h1 { font-size: 54px; margin-top: 30px; }
+  h1 em { font-style: normal; color: var(--pink-soft); }
+  p { margin: 24px 0 0; color: var(--soft); }
+  .screenshot p { font-size: 19px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 26px; max-width: 380px; }
+  .chip { display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 13px; border-radius: 999px; border: 1px solid var(--line); background: rgba(240,239,235,.05); font-size: 13px; font-weight: 600; }
+  .chip.on { border-color: rgba(201,74,143,.6); background: rgba(201,74,143,.16); }
+  .chip svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; opacity: .85; }
+
+  .brand { position: absolute; display: flex; align-items: center; gap: 10px; font-size: 23px; font-weight: 700; letter-spacing: -.01em; }
+  .brand span { color: #8f8a8d; }
+  .marquee .brand { left: 90px; top: 481px; }
+  .screenshot .brand { left: 84px; top: 712px; }
+
+  .team { position: absolute; right: 84px; top: 712px; display: none; align-items: center; gap: 14px; font-size: 13px; color: var(--soft); }
+  .screenshot .team { display: flex; }
+  .team b { display: inline-grid; place-items: center; width: 30px; height: 30px; margin-left: -8px; border-radius: 50%; border: 2px solid #151316; font-size: 9px; color: var(--ink); }
+  .team b:first-child { margin-left: 0; }
+
+  .win { position: absolute; border: 1px solid var(--line); border-radius: 18px; background: #1b191b; box-shadow: 0 30px 80px rgba(0,0,0,.45); }
+  .marquee .win { left: 720px; top: 70px; width: 622px; height: 442px; }
+  .screenshot .win { left: 620px; top: 92px; width: 642px; height: 472px; }
+  .bar { height: 40px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 7px; padding-left: 17px; }
+  .bar i { width: 10px; height: 10px; border-radius: 50%; background: rgba(240,239,235,.16); }
+  .sk { position: absolute; border-radius: 5px; background: rgba(240,239,235,.09); }
+  .box { position: absolute; border-radius: 6px; border: 1px solid var(--line); background: rgba(240,239,235,.05); }
+  .pin { position: absolute; display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--pink); box-shadow: 0 0 0 4px rgba(201,74,143,.25); font-size: 12px; font-weight: 700; }
+  .note { position: absolute; left: 150px; top: 226px; width: 258px; padding: 13px 14px; border: 1px solid rgba(240,239,235,.2); border-radius: 10px; background: #262226; box-shadow: 0 14px 34px rgba(0,0,0,.5); font-size: 13px; }
+  .note small { display: block; margin-bottom: 4px; font-size: 11px; font-weight: 700; color: var(--pink-soft); }
+  .votes { display: flex; gap: 5px; margin-top: 9px; }
+  .votes span { display: inline-flex; align-items: center; gap: 5px; height: 20px; padding: 0 9px; border-radius: 999px; border: 1px solid var(--line); font-size: 10px; color: var(--soft); }
+  .votes span.on { border-color: var(--pink); color: var(--pink-soft); background: rgba(201,74,143,.14); }
+  .pill { position: absolute; right: 38px; bottom: 21px; display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 14px; border-radius: 999px; background: #232024; font-size: 13px; font-weight: 700; }
+  .pill i { width: 7px; height: 7px; border-radius: 50%; background: var(--pink); box-shadow: 0 0 0 3px rgba(201,74,143,.25); }
+  .pill span { font-weight: 400; color: var(--soft); }
+</style>
+</head>
+<body>
+  <div class="copy">
+    <div class="label"><i></i><span id="label"></span></div>
+    <h1>Review any site<br><em>together</em>.</h1>
+    <p id="lede"></p>
+    <div class="chips">
+      <span class="chip on"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.1-5.5 6.5-5.5s5.900 1.900 6.500 5.500M16 4.800a3.500 3.500 0 0 1 0 6.400M18.500 14.900c1.700.8 2.700 2.500 3 5.100"/></svg>Team collaboration</span>
+      <span class="chip"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Private to your team</span>
+      <span class="chip"><svg viewBox="0 0 24 24"><path d="M8 6l-6 6 6 6M16 6l6 6-6 6"/></svg>Open source · MIT</span>
+    </div>
+  </div>
+
+  <div class="brand"><svg viewBox="0 0 64 64" width="28" height="28"><rect x="8" y="28" width="48" height="28" rx="8" fill="#2a2529" stroke="#f0efeb" stroke-opacity=".4" stroke-width="4"/><rect x="8" y="10" width="48" height="28" rx="8" fill="#1f1c1f" stroke="#f0efeb" stroke-width="4"/><circle cx="44" cy="18" r="11" fill="#c94a8f"/></svg><div>comment<span>Layer</span></div></div>
+
+  <div class="team"><div><b style="background:#8a3d6e">MR</b><b style="background:#3d5f8a">DK</b><b style="background:#3d8a62">PS</b><b style="background:#8a6a3d">TA</b></div>Everyone on the layer sees the same pins</div>
+
+  <div class="win">
+    <div class="bar"><i></i><i></i><i></i></div>
+    <div class="sk" style="left:30px;top:68px;width:56px;height:8px"></div>
+    <div class="sk" style="left:98px;top:68px;width:40px;height:8px"></div>
+    <div class="sk" style="left:150px;top:68px;width:40px;height:8px"></div>
+    <div class="sk" style="left:202px;top:68px;width:40px;height:8px"></div>
+    <div class="sk" style="left:30px;top:106px;width:54%;height:19px"></div>
+    <div class="sk" style="left:30px;top:138px;width:34%;height:19px"></div>
+    <div class="box" style="left:30px;top:186px;width:29%;height:88px"></div>
+    <div class="box" style="left:35.500%;top:186px;width:29%;height:88px"></div>
+    <div class="box" style="left:66.500%;top:186px;width:29%;height:88px"></div>
+    <div class="sk" style="left:30px;top:300px;width:81%;height:9px"></div>
+    <div class="sk" style="left:30px;top:320px;width:67%;height:9px"></div>
+    <div class="sk" style="left:30px;top:340px;width:50%;height:9px"></div>
+    <div class="pin" style="left:61%;top:65px">1</div>
+    <div class="pin" style="left:61%;top:189px">2</div>
+    <div class="pin" style="left:18.500%;top:339px">3</div>
+    <div class="note"><small>Maya · Product designer</small>Middle card needs a hover state.<div class="votes"><span class="on">⌃ 3</span><span>⌄ 0</span></div></div>
+    <div class="pill"><i></i>Comments <span>(3)</span></div>
+  </div>
+
+<script>
+  const v = new URLSearchParams(location.search).get('v') === 'screenshot' ? 'screenshot' : 'marquee';
+  document.body.className = v;
+  document.getElementById('label').textContent = v === 'marquee' ? 'Browser extension · Open source' : 'Browser extension';
+  document.getElementById('lede').textContent = v === 'marquee'
+    ? 'Pins and notes your whole team sees on the page itself, and nobody else does. No accounts, no sign-in: one click to start, one link to invite.'
+    : 'Drop a pin, leave a note. Your team sees it on the page, nobody else does. One click to start, one link to invite.';
+</script>
+</body>
+</html>

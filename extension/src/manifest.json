@@ -4,8 +4,7 @@
   "version": "0.1.0",
   "description": "Drop a pin, leave a note. Private review comments on any website. One click to start, one link to invite.",
   "permissions": [
-    "storage",
-    "tabs"
+    "storage"
   ],
   "host_permissions": [
     "<all_urls>"
@@ -49,9 +48,8 @@
     },
     {
       "matches": [
-        "https://summitml.com/commentlayer/join*",
-        "https://www.summitml.com/commentlayer/join*",
-        "http://localhost:3000/commentlayer/join*"
+        "https://commentlayer.summitml.com/join*",
+        "http://localhost:8790/join*"
       ],
       "js": [
         "join.js"

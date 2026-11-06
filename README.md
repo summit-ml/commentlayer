@@ -59,7 +59,7 @@ pick that folder. Then open the extension's options.
 
 **Hosted layers.** Type a name, click "Create layer", done: no sign-in, no setup. Click the
 toolbar icon on any site to turn the layer on there, then drop pins. To invite teammates, click
-"Copy invite" and send the link. It opens a join page at `summitml.com/commentlayer/join`: with
+"Copy invite" and send the link. It opens a join page at `commentlayer.summitml.com/join`: with
 the extension installed, the layer is added on the spot; without it, the page says how to
 install and then finishes the join when they come back. Access control is the link itself, the
 same way a shared Figma or Loom link works. The creator is the layer's admin (rounds, moderation,

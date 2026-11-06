@@ -8,5 +8,13 @@
 
 The wordmark is one word, lower-case c, capital L: commentLayer.
 
-`store/` holds the Chrome Web Store images and the listing copy. They're rendered from a design
-file rather than screenshots, so they stay crisp; regenerate them when the UI changes.
+`store/` holds the Chrome Web Store promo images; the listing copy is in `../store/LISTING.md`.
+The marquee and the promo screenshot are rendered from `store/promo.html`, so they stay crisp;
+regenerate them when the UI or the pitch changes:
+
+```sh
+chrome --headless=new --hide-scrollbars --force-device-scale-factor=1 --window-size=1400,560 \
+  --screenshot=brand/store/marquee-1400x560.png "file://$PWD/brand/store/promo.html?v=marquee"
+chrome --headless=new --hide-scrollbars --force-device-scale-factor=1 --window-size=1280,800 \
+  --screenshot=brand/store/screenshot-1280x800.png "file://$PWD/brand/store/promo.html?v=screenshot"
+```

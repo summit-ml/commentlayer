@@ -6,7 +6,8 @@
 #
 # Hosted layers live under /api/layers and /api/l/<id>; the browser extension talks to the
 # deployment at HOSTED_API in extension/src/background.ts. The single-tenant backend for the
-# embed is /api/commentlayer. The route below gives the Worker its own hostname on a zone in
+# embed is /api/commentlayer. The invite page (/join) and privacy policy (/privacy) are static
+# pages from worker/pages, copied into ./public by `npm run build:extension`. The route below gives the Worker its own hostname on a zone in
 # the same Cloudflare account (the deploy creates the DNS record); change or remove it for
 # your own deployment.
 name = "commentlayer"
@@ -15,12 +16,19 @@ account_id = "5a0f2503e27ed2ff411b41b08bcc5174"
 compatibility_date = "2026-10-01"
 routes = [{ pattern = "commentlayer.summitml.com", custom_domain = true }]
 
+# `wrangler dev` serves here; the extension's dev-only content-script match for /join uses the same port.
+[dev]
+port = 8790
+
 [assets]
 directory = "./public"
 
 [vars]
 # A hosted layer is deleted this many days after its last note.
 LAYER_TTL_DAYS = "30"
+# Where /install sends people from the invite page. Swap in the Chrome Web Store listing once
+# the extension has one.
+STORE_URL = "https://github.com/summit-ml/commentlayer#3-browser-extension-the-free-way"
 
 [[kv_namespaces]]
 binding = "COMMENTS"

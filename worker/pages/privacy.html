@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy · CommentLayer</title>
+<meta name="description" content="What the CommentLayer browser extension and hosted layers store, where, and for how long.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Sofia+Sans:wght@700&family=Space+Grotesk:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="/site.css">
+</head>
+<body>
+<header class="site-top"><div class="site-top-inner"><a class="site-logo" href="https://summitml.com" aria-label="Summit ML"><img src="/summitml.svg" alt="Summit ML" width="182" height="22"></a></div></header>
+
+<main class="doc">
+  <div class="doc-brand"><svg viewBox="0 0 64 64" width="22" height="22" aria-hidden="true"><rect x="8" y="28" width="48" height="28" rx="8" fill="#2a2529" stroke="#f0efeb" stroke-opacity=".4" stroke-width="4"/><rect x="8" y="10" width="48" height="28" rx="8" fill="#1f1c1f" stroke="#f0efeb" stroke-width="4"/><circle cx="44" cy="18" r="11" fill="#c94a8f"/></svg><div>comment<span>Layer</span></div></div>
+
+  <p class="doc-kicker">Privacy policy</p>
+  <h1>What CommentLayer stores, and where</h1>
+  <p>Effective November 6, 2026. This policy covers the CommentLayer browser extension and the hosted layer service at <code>commentlayer.summitml.com</code>, both run by Summit ML. CommentLayer is open source, so everything described here can be checked against <a href="https://github.com/summit-ml/commentlayer">the code</a>.</p>
+
+  <div class="doc-card">
+    <p><b>The short version.</b> There are no accounts, no ads, and no analytics. The extension does nothing on a site until you turn it on there. The notes you leave on a hosted layer are stored on our server so the people with the layer's invite link can see them, and they are deleted 30 days after the layer's last note.</p>
+  </div>
+
+  <h2>What stays in your browser</h2>
+  <p>The extension keeps these in Chrome's local extension storage on your device. They are not sent to us except where noted below.</p>
+  <ul>
+    <li>The layers you created or joined, including each layer's invite key, and the admin key for layers you created.</li>
+    <li>The list of sites you turned each layer on for.</li>
+    <li>The display name you typed, your theme colors, and an admin token if you entered one.</li>
+    <li>A random identifier generated on your device. It lets you edit and delete your own notes without an account.</li>
+  </ul>
+
+  <h2>What a hosted layer stores on our server</h2>
+  <p>When you create a layer, we store its name and one-way hashes of its invite key and admin key. When you leave a note on it, we store:</p>
+  <ul>
+    <li>The text of the note and the display name you chose.</li>
+    <li>The address of the page (host and path) the note is on.</li>
+    <li>Where the pin sits: a CSS selector for the element you clicked, the position inside it, the element's tag, a label or text snippet from that element of up to 120 characters, and your viewport size.</li>
+    <li>Timestamps, the review round, whether the note is resolved, and up and down votes.</li>
+    <li>A one-way hash of your random identifier, to record which notes and votes are yours. Other people see vote counts, not who voted.</li>
+  </ul>
+  <p>The extension does not read or send anything else from the pages you visit: no browsing history, no page contents beyond the snippet above, no form data, no cookies.</p>
+
+  <h2>When the extension contacts our server</h2>
+  <ul>
+    <li>When you create, join, or delete a hosted layer.</li>
+    <li>On sites where you turned a hosted layer on: to load the layer's notes, to check for new ones about every twenty seconds, and to save what you write.</li>
+  </ul>
+  <p>On every other site the extension sends nothing.</p>
+
+  <h2>Who can see your notes</h2>
+  <p>Anyone who has a layer's invite link can read every note on that layer and add their own. The link is the access control, the same way a shared document link works, so send it only to people who should see the notes. Nothing is posted to the site being reviewed, and layers are not listed or searchable anywhere.</p>
+
+  <h2>How long we keep it</h2>
+  <p>A hosted layer and everything on it is deleted automatically 30 days after its last note. The person who created a layer can delete it sooner from the extension's options page, and anyone on a layer can export its notes as CSV or JSON first. You can edit or delete your own notes at any time.</p>
+
+  <h2>Who processes it</h2>
+  <p>The hosted service runs on Cloudflare Workers and stores layers in Cloudflare's key-value storage. Cloudflare handles network-level data such as IP addresses in order to deliver and protect the service; our code does not record IP addresses or build profiles of visitors. The join page and this page load their fonts from Google Fonts, which involves a request from your browser to Google. We do not sell or share your data with anyone else, and we do not use it for advertising, for creditworthiness or lending decisions, or for anything other than showing review notes to the people on a layer.</p>
+  <p>The use of information received by the extension adheres to the <a href="https://developer.chrome.com/docs/webstore/program-policies/user-data-faq">Chrome Web Store User Data Policy</a>, including its Limited Use requirements.</p>
+
+  <h2>Your own backend, and the embed</h2>
+  <p>If you point the extension at a CommentLayer backend you host yourself, your notes go to that backend and never reach us. The same is true when a site embeds CommentLayer with its own backend: whoever runs that backend is responsible for the data.</p>
+
+  <h2>Removing your data</h2>
+  <p>Delete your notes from the overlay, or delete the whole layer if you created it. Removing the extension clears everything it stored in your browser. If you need a layer removed and can't do it yourself, email <a href="mailto:hello@summitml.com">hello@summitml.com</a> with the layer's invite link so we can find it.</p>
+
+  <h2>Changes</h2>
+  <p>If this policy changes, the new version will be posted here with a new effective date. Questions: <a href="mailto:hello@summitml.com">hello@summitml.com</a>.</p>
+
+</main>
+
+<footer class="site-end"><div class="site-end-inner">
+  <a href="https://summitml.com">Built by Summit ML</a>
+  <a href="https://summitml.com/products/open-source">Our open source products</a>
+  <a href="https://github.com/summit-ml/commentlayer">GitHub</a>
+  <a href="/join">Join a layer</a>
+</div></footer>
+</body>
+</html>

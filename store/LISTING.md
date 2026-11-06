@@ -39,7 +39,9 @@ Only people with your invite link can see your notes, and nothing is ever posted
 Open source under the MIT license: https://github.com/summit-ml/commentlayer
 Built by Summit ML: https://summitml.com/products/open-source
 
-**Screenshots (1280×800):** `screenshot-drawer.png`, `screenshot-panel.png`
+**Screenshots (1280×800):** `../brand/store/screenshot-1280x800.png` first, then `screenshot-drawer.png`, `screenshot-panel.png`
+
+**Promo tiles:** `../brand/store/small-tile-440x280.png`, `../brand/store/marquee-1400x560.png`
 
 **Icon:** `extension/src/icon128.png`
 
@@ -57,18 +59,17 @@ Leave and read review comments pinned to elements on web pages, shared with the 
 **Permission justifications:**
 
 - `storage`: Saves the reviewer's layers, display name, theme colors, and a random identifier used to edit their own comments.
-- `tabs`: Reads the current tab's address so the toolbar icon can turn a layer on or off for that site and show whether it is active there.
-- Host permission (all sites): Reviewers comment on whatever site they are reviewing, so the comment overlay must be able to load on any page the user turns it on for. The overlay only reads the clicked element's position and selector to place a pin; it does not read page content.
+- Host permission (all sites): Reviewers comment on whatever site they are reviewing, so the comment overlay must be able to load on any page, and the toolbar icon reads the current tab's address to turn a layer on or off for that site and show whether it is active there. The overlay stays dormant until the user turns it on for a site. When the user drops a pin it records the clicked element's position, CSS selector, tag, and a short label or text snippet (up to 120 characters) so teammates can find the pin; it reads nothing else from the page.
 
 **Remote code:** No, I am not using remote code. (All JavaScript ships in the package.)
 
 **Data usage, check:**
 - Personally identifiable information (the name the user types to sign comments)
-- Website content (the comment text, page address, and element the user pins it to)
+- Website content (the comment text, page address, and the pinned element's selector, tag, and a short text snippet)
 
 **Certify all three:** not sold to third parties; not used for purposes unrelated to the single purpose; not used for creditworthiness or lending.
 
-**Privacy policy URL:** https://summitml.com/policies/privacy#commentlayer
+**Privacy policy URL:** https://commentlayer.summitml.com/privacy
 
 ## Distribution
 
