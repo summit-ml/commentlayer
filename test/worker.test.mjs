@@ -73,3 +73,10 @@ test("/install sends the invite page's visitors to wherever the extension is ins
   assert.equal(res.status, 302);
   assert.equal(res.headers.get("location"), "https://store.test/commentlayer");
 });
+
+test("the bare hostname lands on the join page's introduction", async () => {
+  const { call } = boot();
+  const res = await call("GET", "/");
+  assert.equal(res.status, 302);
+  assert.equal(res.headers.get("location"), "https://cl.test/join?from=site");
+});

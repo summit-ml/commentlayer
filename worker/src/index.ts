@@ -11,7 +11,8 @@ import { createCommentStore, createHandler, sha256, type Persistence, type Store
  * it keeps the `data` key and the optional ADMIN_TOKEN secret from earlier versions.
  *
  * The invite page (`/join`) and the privacy policy (`/privacy`) are static assets from
- * `worker/pages`; `/install` sends people on to wherever the extension is installed from.
+ * `worker/pages`; `/install` sends people on to wherever the extension is installed from, and
+ * the bare hostname lands on the join page, which introduces CommentLayer when there is no invite.
  */
 
 type Env = { COMMENTS: KVNamespace; STORE_URL: string; ADMIN_TOKEN?: string; LAYER_TTL_DAYS?: string };
@@ -45,6 +46,7 @@ export default {
     if (req.method === "OPTIONS" && url.pathname.startsWith("/api/")) return new Response(null, { status: 204, headers: CORS });
 
     if (url.pathname === "/install") return Response.redirect(env.STORE_URL, 302);
+    if (url.pathname === "/") return Response.redirect(new URL("/join?from=site", url).href, 302);
 
     const ttl = DAY * (Number(env.LAYER_TTL_DAYS) || 30);
     const kv = env.COMMENTS;

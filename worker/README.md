@@ -33,6 +33,7 @@ time. Keys are stored hashed.
   (`extension/src/join.js`) adds the layer; without it the page points at `/install` and
   finishes when the visitor comes back.
 - `/install`: redirects to `STORE_URL` in `wrangler.toml`.
+- `/`: redirects to `/join?from=site`, which shows the introduction instead of an invite.
 - `/privacy`: the privacy policy for the extension and hosted layers.
 
 ## Single-tenant backend (for the embed)
