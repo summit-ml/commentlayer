@@ -1,9 +1,13 @@
-# Google setup for the extension
+# Google setup for sheet layers
 
-Google Sheet layers are the extension's advanced option (the default is a hosted layer, which
-needs no sign-in). A sheet layer stores comments in a Google Sheet using the reviewer's own
-Google account. For that it needs an OAuth client, which is a one-time, free setup for whoever
-publishes the extension. End users never see any of this; they just see Google's sign-in.
+**Sheet layers are not in the current extension.** The Web Store build has no `identity`
+permission, no `oauth2` block in the manifest, and no sheet controls on the options page. The
+service worker and the overlay still handle a sheet layer, so a fork can bring them back by
+restoring those three things; this page covers the Google side.
+
+A sheet layer stores comments in a Google Sheet using the reviewer's own Google account. For
+that it needs an OAuth client, which is a one-time, free setup for whoever publishes the
+extension. End users never see any of this; they just see Google's sign-in.
 
 1. **Create a Google Cloud project** at console.cloud.google.com (any name).
 2. **Enable the Google Sheets API** under APIs & Services → Library.
@@ -19,11 +23,13 @@ publishes the extension. End users never see any of this; they just see Google's
    unpacked extension once, copy its ID from `chrome://extensions`, and pin it by adding a
    `key` field to the manifest so the ID stays stable (the Web Store docs explain how to get
    the key from the `.pem`).
-5. **Paste the client ID** into `extension/src/manifest.json` under `oauth2.client_id` and
-   rebuild with `npm run build`.
+5. **Add the client to the manifest.** In `extension/src/manifest.json`, add `"identity"` to
+   `permissions` and an `oauth2` block with the `client_id` and the two scopes above, then
+   rebuild with `npm run build:extension`.
 
 That's it. The first time a reviewer creates or opens a sheet layer, Chrome shows Google's
-consent screen once and caches the token. "Sign out of Google" in the options clears it.
+consent screen once and caches the token. The service worker still answers a `signOut` message
+that clears it; the options-page button that sent it was removed with the other sheet controls.
 
 ## What the extension does with the access
 

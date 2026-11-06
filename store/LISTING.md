@@ -1,7 +1,7 @@
 # Chrome Web Store listing
 
 Paste these into the Developer Dashboard. Upload `commentlayer-<version>.zip`, built with
-`npm run package` in `packages/commentlayer`.
+`npm run package` at the root of this repo.
 
 ## Store listing
 
