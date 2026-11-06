@@ -95,11 +95,12 @@ function init(cfg) {
   // Mixing a color with itself in sRGB makes the browser convert it, so oklch(), lab() and display-p3 values come back as plain channels.
   const rgbOf = v => {
     const probe = document.createElement('span');
-    probe.style.color = `color-mix(in srgb, ${v}, ${v})`;
+    probe.style.setProperty('color', `color-mix(in srgb, ${v}, ${v})`, 'important');
     document.body.append(probe);
-    const channels = getComputedStyle(probe).color.replace(/^.*srgb\s*|\).*$/g, '').split(/[\s/]+/);
+    const channels = getComputedStyle(probe).color.replace(/^.*srgb\s*|\).*$/g, '').split(/[\s/]+/).slice(0, 3).map(Number);
     probe.remove();
-    return channels.slice(0, 3).map(n => Math.min(255, Math.max(0, Number(n) * 255)));
+    if (channels.length < 3 || channels.some(n => !Number.isFinite(n))) return [0, 0, 0];
+    return channels.map(n => Math.min(255, Math.max(0, n * 255)));
   };
   const toHex = v => '#' + rgbOf(v).map(n => Math.round(n).toString(16).padStart(2, '0')).join('');
   const contrastOn = v => { const [r, g, b] = rgbOf(v); return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255 > 0.6 ? '#1f1c1f' : '#ffffff'; };
@@ -133,6 +134,7 @@ function init(cfg) {
   }
   let themeOpen = false;
   let nameDraft = '';
+  let wantNameFocus = false;
   // ── holidays: the status dot becomes a small icon on the day ──────────────────
   const HOLIDAY_ICONS = {
     halloween: '<path d="M11 3h2v4h-2z"/><path d="M8 7c-3.3 0-6 3.1-6 7s2.7 7 6 7c1.5 0 2.9-.5 4-1.4 1.1.9 2.5 1.4 4 1.4 3.3 0 6-3.1 6-7s-2.7-7-6-7c-1.5 0-2.9.5-4 1.4C10.9 7.5 9.5 7 8 7z"/><path d="M9.2 8.6c-1.1 2.2-1.1 8.6 0 10.8M14.8 8.6c1.1 2.2 1.1 8.6 0 10.8" stroke="var(--cl-bg)" stroke-width="1.3" fill="none" stroke-linecap="round"/>',
@@ -234,8 +236,7 @@ function init(cfg) {
   // unless the theme form is up or the reviewer is part-way through typing.
   const hoverable = window.matchMedia('(hover: hover)');
   const unpin = () => { if (hoverable.matches) bar.classList.remove('is-open'); };
-  bar.addEventListener('mouseenter', () => { if (hoverable.matches) bar.classList.add('is-hover'); });
-  bar.addEventListener('mouseleave', () => {
+  const leaveDock = () => {
     bar.classList.remove('is-hover');
     if (!hoverable.matches || themeOpen) return;
     const focused = bar.contains(document.activeElement) ? document.activeElement : null;
@@ -243,7 +244,12 @@ function init(cfg) {
     closeMenu();
     if (focused) focused.blur();
     unpin();
-  });
+  };
+  bar.addEventListener('mouseenter', () => { if (hoverable.matches) bar.classList.add('is-hover'); });
+  bar.addEventListener('mouseleave', leaveDock);
+  // The browser sends no mouseleave when the hovered element was removed by a render and something then covers the
+  // dock (the drawer does), so also notice the pointer arriving on anything outside it.
+  document.addEventListener('mouseover', e => { if (bar.classList.contains('is-hover') && !bar.contains(e.target)) leaveDock(); });
   function mountDock(panel, tab) {
     bar.append(goo, panel, tab);
     sizer.disconnect();
@@ -252,6 +258,9 @@ function init(cfg) {
   }
 
   function renderBar() {
+    const active = document.activeElement;
+    const focusName = wantNameFocus || !!(active && bar.contains(active) && active.closest('.cl-name-form'));
+    wantNameFocus = false;
     bar.replaceChildren();
     const here = comments.slice().sort((a, b) => a.createdAt.localeCompare(b.createdAt));
     const open = here.filter(c => !c.resolved).length;
@@ -266,10 +275,10 @@ function init(cfg) {
         input, el('button', { class: 'cl-primary', type: 'submit', text: 'Start' })
       ]);
       head.append(el('div', { class: 'cl-head-text' }, [el('b', { text: 'Comment as' }), form, el('small', { class: 'cl-private', text: 'Private to this layer. Nothing you write here is public.' })]));
-      setTimeout(() => input.focus(), 0);
+      if (focusName) setTimeout(() => input.focus(), 0);
     } else {
       const sub = el('small', { class: name ? 'cl-who-btn' : '', title: name ? 'Change name' : '', text: name ? name + (admin ? ' · admin' : '') + (mode ? ' · click anything to leave a note' : ' · private to this layer') : 'Turn on to leave a private note' });
-      if (name) sub.addEventListener('click', () => { name = ''; if (mode) renderBar(); else setMode(true); bar.classList.add('is-open'); });
+      if (name) sub.addEventListener('click', () => { name = ''; wantNameFocus = true; if (mode) renderBar(); else setMode(true); bar.classList.add('is-open'); });
       head.append(
         el('div', { class: 'cl-head-text' }, [el('b', { text: 'Commenting' }), sub]),
         el('button', { class: 'cl-switch', type: 'button', role: 'switch', 'aria-checked': String(mode), 'aria-label': mode ? 'Turn commenting off' : 'Turn commenting on', onclick: () => setMode(!mode) }));
@@ -450,7 +459,7 @@ function init(cfg) {
     ss.set('cl-mode', on ? 'on' : 'off');
     layer.classList.toggle('cl-on', on);
     closePop();
-    if (on && !name) bar.classList.add('is-open');
+    if (on && !name) { bar.classList.add('is-open'); wantNameFocus = true; }
     if (!on) unpin();
     renderBar();
     if (on) { renderPins(); if (name) toast('Click anywhere on the page to leave a comment.'); }
@@ -503,7 +512,7 @@ function init(cfg) {
             const v = ta.value.trim(); if (!v) return;
             try { const u = await api('PATCH', `${API}/${c.id}`, { text: v }); Object.assign(c, u); await refresh(); openPop(c, layer.querySelector(`[data-id="${c.id}"]`)); toast('Comment updated.'); } catch (err) { toast(err.message); }
           } }),
-          el('button', { type: 'button', text: 'Cancel', onclick: () => openPop(c, pin) }));
+          el('button', { type: 'button', text: 'Cancel', onclick: () => openPop(c, layer.querySelector(`[data-id="${c.id}"]`) || pin) }));
         ta.focus();
       } }));
       actions.append(el('span', { class: 'cl-spacer' }), el('button', { class: 'cl-danger', type: 'button', text: 'Delete', onclick: async () => {
@@ -551,7 +560,7 @@ function init(cfg) {
   }
 
   let drawer = null;
-  function closeDrawer() { if (drawer) { drawer.remove(); drawer = null; } }
+  function closeDrawer() { if (drawer) { if (openMenu && drawer.contains(openMenu)) closeMenu(); drawer.remove(); drawer = null; } }
   async function openDrawer() {
     closeDrawer();
     await refresh();
@@ -721,7 +730,7 @@ function init(cfg) {
     e.preventDefault();
     e.stopPropagation();
     if (activePop) { closePop(); return; }
-    if (!name) { renderBar(); return; }
+    if (!name) { wantNameFocus = true; renderBar(); return; }
     openNew(e);
   }, true);
   document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeMenu(); closePop(); closeDrawer(); bar.classList.remove('is-open'); if (themeOpen) { themeOpen = false; renderBar(); } } });
