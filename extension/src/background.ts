@@ -108,7 +108,7 @@ async function handleLocally(layer: Extract<Layer, { type: "sheet" }>, url: stri
 }
 
 // ── messages from the content script and the options page ───────────────────
-chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
+chrome.runtime.onMessage.addListener((msg, sender, reply) => {
   (async () => {
     try {
       if (msg.type === "config") {
@@ -126,6 +126,8 @@ chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
         }
         // The creator of a hosted layer is its admin without typing a token.
         if (layer && layer.type === "hosted" && layer.adminKey) s.values["cl-admin"] = layer.adminKey;
+        // The stylesheet goes in only where a layer is on, so pages the reviewer hasn't turned it on for are untouched.
+        if (layer && sender.tab?.id !== undefined) await chrome.scripting.insertCSS({ target: { tabId: sender.tab.id }, files: ["commentlayer.css"] });
         reply({ enabled: !!layer, api: layer ? (layer.type === "sheet" ? LOCAL_BASE : layer.api) : "", layer: layer ? { id: layer.id, name: layer.name, type: layer.type, url: layer.type === "sheet" ? layer.url : null, spreadsheetId: layer.type === "sheet" ? layer.spreadsheetId : null, api: layer.type === "sheet" ? null : layer.api, ttlDays: layer.type === "hosted" ? layer.ttlDays ?? 30 : null, layerId: layer.type === "hosted" ? layer.layerId : null, key: layer.type === "hosted" ? layer.key : null } : null, values: s.values });
       } else if (msg.type === "set") {
         await chrome.storage.local.set({ [msg.key]: msg.value });
@@ -276,6 +278,6 @@ chrome.tabs.onUpdated.addListener((tabId, info, tab) => {
   if (info.status === "complete" && tab.url) badge(tabId, hostOf(tab.url));
 });
 chrome.tabs.onActivated.addListener(async ({ tabId }) => {
-  const tab = await chrome.tabs.get(tabId);
-  if (tab.url) badge(tabId, hostOf(tab.url));
+  const tab = await chrome.tabs.get(tabId).catch(() => null);
+  if (tab?.url) badge(tabId, hostOf(tab.url));
 });

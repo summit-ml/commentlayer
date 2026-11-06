@@ -4,7 +4,8 @@
   "version": "0.1.0",
   "description": "Drop a pin, leave a note. Private review comments on any website. One click to start, one link to invite.",
   "permissions": [
-    "storage"
+    "storage",
+    "scripting"
   ],
   "host_permissions": [
     "<all_urls>"
@@ -40,9 +41,6 @@
       "js": [
         "bridge.js",
         "commentlayer.js"
-      ],
-      "css": [
-        "commentlayer.css"
       ],
       "run_at": "document_idle"
     },
