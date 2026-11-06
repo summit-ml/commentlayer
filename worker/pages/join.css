@@ -152,7 +152,8 @@
 }
 
 /* ── reactions: twelve items, three slots, 48s loop; item i is visible for 12s starting at i × 4s ── */
-.jd-thread { position: relative; width: 100%; max-width: 520px; margin: 22px 0 0 auto; height: 190px; }
+.jd-label { width: 100%; max-width: 520px; margin: 22px 0 0 auto; font: 600 11px/1 var(--font-code); letter-spacing: 0.14em; text-transform: uppercase; color: var(--hn-ink-muted); }
+.jd-thread { position: relative; width: 100%; max-width: 520px; margin: 12px 0 0 auto; height: 190px; }
 .jd-reaction { position: absolute; left: 0; right: 0; top: calc(var(--slot) * 64px); display: grid; grid-template-columns: 30px 1fr; gap: 11px; align-items: start; padding: 9px 12px; border-radius: 11px; background: rgba(240, 239, 235, 0.04); border: 1px solid rgba(240, 239, 235, 0.08); opacity: 0; animation: jd-reaction 48s linear infinite; animation-delay: calc(var(--i) * -4s - 48s); }
 .jd-avatar { width: 30px; height: 30px; border-radius: 50%; background: hsl(var(--hue) 45% 38%); color: #fff; font: 600 11px/30px var(--font-body, system-ui); text-align: center; letter-spacing: 0.02em; }
 .jd-reaction-body { min-width: 0; }
@@ -213,3 +214,7 @@
 .clj-fallback.is-hl { animation: clj-hl 2.4s ease-out; }
 @keyframes clj-hl { 0% { box-shadow: 0 0 0 0 rgba(201, 74, 143, 0); background: rgba(201, 74, 143, 0); } 12% { box-shadow: 0 0 0 2px rgba(201, 74, 143, 0.6); background: rgba(201, 74, 143, 0.12); } 100% { box-shadow: 0 0 0 2px rgba(201, 74, 143, 0); background: rgba(201, 74, 143, 0); } }
 @media (max-width: 600px) { .clj-callout { right: 10px; font-size: 12px; } }
+
+/* ── the Join button: nothing is joined until the visitor asks ───────── */
+.clj-ready small { display: block; margin-top: 14px; color: var(--hn-ink-muted); font-size: 0.85rem; line-height: 1.5; }
+.clj-ready .hn-btn { cursor: pointer; }
