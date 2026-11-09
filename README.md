@@ -92,8 +92,10 @@ runs on the free tier, serves the overlay files too so you can embed from anywhe
 
 ### 3. Browser extension (the free way)
 
-For Chrome. `npm run build:extension` writes `extension/dist`. In Chrome: Extensions → Developer
-mode → Load unpacked → pick that folder. Then open the extension's options. Its permissions
+For Chrome: [install it from the Chrome Web Store](https://chromewebstore.google.com/detail/commentlayer/ialifdemnohhenlecooccbalolabjgpa),
+then open the extension's options. To run it from source instead, `npm run build:extension`
+writes `extension/dist`; in Chrome: Extensions → Developer mode → Load unpacked → pick that
+folder. Its permissions
 are storage, scripting, and access to all sites, so it can show the overlay on whichever site
 you turn it on for; until you click its toolbar icon on a site, it adds nothing to that page and
 sends nothing.

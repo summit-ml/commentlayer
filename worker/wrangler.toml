@@ -28,7 +28,7 @@ directory = "./public"
 LAYER_TTL_DAYS = "30"
 # Where /install sends people from the invite page. Swap in the Chrome Web Store listing once
 # the extension has one.
-STORE_URL = "https://github.com/summit-ml/commentlayer#3-browser-extension-the-free-way"
+STORE_URL = "https://chromewebstore.google.com/detail/commentlayer/ialifdemnohhenlecooccbalolabjgpa"
 
 # Each layer is one Durable Object, so everyone on a layer reads and writes the same copy.
 [[durable_objects.bindings]]
