@@ -1,6 +1,6 @@
 {
   "name": "commentlayer",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Drop-a-pin review comments for any site: a client overlay plus a storage-backed request handler.",
   "license": "MIT",
   "type": "module",
