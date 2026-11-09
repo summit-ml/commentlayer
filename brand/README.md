@@ -8,6 +8,10 @@
 
 The wordmark is one word, lower-case c, capital L: commentLayer.
 
+`icon-128.png` through `icon-1024.png` are `mark.svg` rendered on a transparent background
+(`rsvg-convert -w N -h N mark.svg -o icon-N.png`); `icon-1024-dark.png` is the same mark on the
+brand's near-black `#151316`, for avatars and anywhere a solid square is needed.
+
 `store/` holds the Chrome Web Store promo images; the listing copy is in `../store/LISTING.md`.
 The marquee and the promo screenshot are rendered from `store/promo.html`, so they stay crisp;
 regenerate them when the UI or the pitch changes:
